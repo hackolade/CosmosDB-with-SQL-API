@@ -1,0 +1,51 @@
+/*
+* Copyright © 2016-2017 by IntegrIT S.A. dba Hackolade.  All rights reserved.
+*
+* The copyright to the computer software herein is the property of IntegrIT S.A.
+* The software may be used and/or copied only with the written permission of 
+* IntegrIT S.A. or in accordance with the terms and conditions stipulated in 
+* the agreement/contract under which the software has been supplied. 
+*
+*/
+[
+	{
+		"lowerTab": "Connection",
+		"structure": [
+			{
+				"inputLabel": "Disable SSL Authentication for local instance",
+				"inputKeyword": "disableSSL",
+				"inputType": "checkbox",
+				"inputTooltip": "Check this box if you want to connect to a local instance of DocumentDB"
+			},
+			{
+				"inputLabel": "Name",
+				"inputKeyword": "name",
+				"inputType": "text",
+				"inputTooltip": "Choose a friendly connection name"
+				
+			},
+			{
+				"inputLabel": "Address",
+				"inputKeyword": "host",
+				"inputType": "text",
+				"inputTooltip": "Specify host IP address or DNS name of the DocumentDB instance",
+				"inputPlaceholder": "https://<databaseaccount>.documents.azure.com or https://localhost"
+			},
+			{
+				"inputLabel": "Port",
+				"inputKeyword": "port",
+				"inputType": "text",
+				"inputTooltip": "Specify the port number of the DocumentDB instance",
+				"inputPlaceholder": "443 for Azure instance, or 8081 for local instance"
+			},
+			{
+				"inputLabel": "Account Key",
+				"inputKeyword": "accountKey",
+				"inputType": "text",
+				"inputTooltip": "Paste the account Primary or Secondary (Read-Only) Key, or C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw== if local instance",
+				"isHiddenKey": true,
+				"defaultValue": ""
+			}
+		]
+	}
+]

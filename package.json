@@ -1,0 +1,22 @@
+{
+	"name": "CosmosDB-with-SQL-API",
+	"version": "0.1.10",
+	"versionDate": "2018-08-21",
+	"author": "hackolade",
+	"engines": {
+		"hackolade": "1.10.x",
+		"hackoladePlugin": "1.0.0"
+	},
+	"contributes": {
+		"target": {
+			"applicationTarget": "COSMOSDB-SQL",
+			"title": "Cosmos DB w/ SQL API",
+			"versions": [
+			]
+		},
+		"features": {
+			"nestedCollections": false
+		}
+	},
+	"description": "Hackolade plugin for Azure Cosmos DB with SQL API"
+}

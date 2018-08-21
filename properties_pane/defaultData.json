@@ -1,0 +1,79 @@
+/*
+* Copyright © 2016-2017 by IntegrIT S.A. dba Hackolade.  All rights reserved.
+*
+* The copyright to the computer software herein is the property of IntegrIT S.A.
+* The software may be used and/or copied only with the written permission of 
+* IntegrIT S.A. or in accordance with the terms and conditions stipulated in 
+* the agreement/contract under which the software has been supplied. 
+*
+*/
+{
+	"model": {
+		"modelName": "New model",
+		"dbVersion": "",
+		"dbVendor": "CosmosDB",
+		"apiExperience": "SQL API"
+	},
+	"container": {
+		"name": "New collection",
+		"indexes": []
+	},
+	"collection": {
+		"collectionName": "New document type",
+		"collectionUsers": [],
+		"collation": {}
+	},
+	"field": {
+		"name": "New field"
+	},
+	"patternField": {
+		"name": "^[a-zA-Z0-9_.-]+$"
+	},
+	"multipleField": {
+		"primaryKey": false
+	},
+	"subschema": {},
+	"arrayItem": {},
+	"choice": {},
+	"relationship": {},
+	"user": {},
+	"view": {
+		"viewOn": "",
+		"pipeline": ""
+	},
+	"indexes": {
+		"name": "New Index",
+		"indexDescription": "",
+		"automatic": false,
+		"mode": "Consistent",
+		"indexIncludedPath": "",
+		"kind": "Hash",
+		"dataType": "String",
+		"indexPrecision": "",
+		"indexExcludedPath": "",
+		"indexComments": ""
+	},
+	"storedProcs": {
+		"name": "New Stored Procs",
+		"storedProcID": "",
+		"storedProcDescription": "",
+		"storedProcFunction": "",
+		"storedProcComments": ""
+	},
+	"triggers": {
+		"name": "New Trigger",
+		"triggerID": "",
+		"triggerDescription": "",
+		"prePostTrigger": "Pre-Trigger",
+		"triggerOperation": "All",
+		"triggerFunction": "",
+		"triggerComments": ""
+	},
+	"udfs": {
+		"name": "New UDF",
+		"udfID": "",
+		"udfDescription": "",
+		"udfFunction": "",
+		"udfComments": ""
+	}
+}

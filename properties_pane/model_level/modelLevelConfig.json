@@ -1,0 +1,213 @@
+/*
+* Copyright © 2016-2017 by IntegrIT S.A. dba Hackolade.  All rights reserved.
+*
+* The copyright to the computer software herein is the property of IntegrIT S.A.
+* The software may be used and/or copied only with the written permission of 
+* IntegrIT S.A. or in accordance with the terms and conditions stipulated in 
+* the agreement/contract under which the software has been supplied. 
+
+
+In order to define custom properties for any object's properties pane, you may copy/paste from the following,
+making sure that you maintain a proper JSON format.
+
+			{
+				"propertyName": "Simple text",
+				"propertyKeyword": "simpletextProp",
+				"shouldValidate": false,
+				"propertyType": "text",
+				"sampleGen": "&containerName|&entityName|&random|<value>"
+			},
+			{
+				"propertyName": "Text area",
+				"propertyKeyword": "textareaProp",
+				"propertyValidate": false,
+				"propertyTooltip": "Popup for multi-line text entry",
+				"propertyType": "details",
+				"template": "textarea"
+			},
+			{
+				"propertyName": "Dropdown selection",
+				"propertyKeyword": "dropdownProp",
+				"shouldValidate": false,
+				"propertyTooltip": "Select from list of options",
+				"propertyType": "select",
+				"options": [
+					"Option 1",
+					"Option 2",
+					"Option 3",
+					"Option 4"
+				]
+			},
+			{
+				"propertyName": "Numeric",
+				"propertyKeyword": "numericProp",
+				"propertyValidate": true,
+				"propertyType": "numeric",
+				"valueType": "number",
+				"allowNegative": false,
+				"sampleGen": "&containerName|&entityName|&random|<value>"
+			},
+			{
+				"propertyName": "Checkbox",
+				"propertyKeyword": "checkboxProp",
+				"shouldValidate": false,
+				"propertyType": "checkbox"
+			},
+			{
+				"propertyName": "Group",
+				"propertyType": "group",
+				"propertyKeyword": "grpProp",
+				"shouldValidate": true,
+				"propertyTooltip": "",
+				"structure": [
+					{
+						"propertyName": "Simple Grp Text",
+						"propertyKeyword": "simpleGrpText",
+						"shouldValidate": false,
+						"propertyTooltip": "",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Group Number",
+						"propertyKeyword": "grpNumber",
+						"propertyValidate": true,
+						"propertyType": "numeric",
+						"valueType": "number",
+						"allowNegative": false
+					}
+				]
+			}
+
+*/
+
+[
+	{
+		"lowerTab": "Details",
+		"structure": [
+			{
+				"propertyName": "DB vendor",
+				"propertyKeyword": "dbVendor",
+				"shouldValidate": false,
+				"propertyTooltip": "db vendor",
+				"propertyType": "select",
+				"options": [
+					"CosmosDB"
+				],
+				"disabledOption": true
+			},
+			{
+				"propertyName": "Tenant",
+				"propertyKeyword": "tenant",
+				"shouldValidate": false,
+				"propertyTooltip": "Azure tenant",
+				"propertyType": "text"
+			},
+			{
+				"propertyName": "Account ID",
+				"propertyKeyword": "accountID",
+				"shouldValidate": false,
+				"propertyTooltip": "Azure CosmosDB account ID",
+				"propertyType": "text"
+			},
+			{
+				"propertyName": "Resource group",
+				"propertyKeyword": "resGrp",
+				"shouldValidate": false,
+				"propertyTooltip": "Resource Group",
+				"propertyType": "text"
+			},
+			{
+				"propertyName": "Subscription",
+				"propertyKeyword": "subscription",
+				"shouldValidate": false,
+				"propertyTooltip": "Subscription",
+				"propertyType": "text"
+			},
+			{
+				"propertyName": "Database ID",
+				"propertyKeyword": "dbId",
+				"shouldValidate": false,
+				"propertyTooltip": "A database is a logical container of one or more collections",
+				"propertyType": "text"
+			},
+			{
+				"propertyName": "Preferred location",
+				"propertyKeyword": "preferredLocation",
+				"shouldValidate": false,
+				"propertyTooltip": "Default experience",
+				"propertyType": "select",
+				"options": [
+					"",
+					"West US", 
+					"West US 2", 
+					"West Central US", 
+					"East US",
+					"East US 2", 
+					"Central US", 
+					"South Central US", 
+					"North Central US", 
+					"West Europe", 
+					"North Europe", 
+					"France Central",
+					"East Asia", 
+					"Southeast Asia", 
+					"Japan West", 
+					"Japan East", 
+					"Australia Southeast", 
+					"Australia East", 
+					"Central India", 
+					"South India", 
+					"West India", 
+					"Canada East", 
+					"Canada Central", 
+					"Germany Central", 
+					"Germany Northeast",
+					"China North", 
+					"China East", 
+					"Korea South", 
+					"Korea Central",
+					"UK West", 
+					"UK South", 
+					"Brazil South", 
+					"USGov Arizona", 
+					"USGov Texas"
+				],
+				"disabledOption": false
+			},			{
+				"propertyName": "API Experience",
+				"propertyKeyword": "apiExperience",
+				"shouldValidate": false,
+				"propertyTooltip": "Default experience",
+				"propertyType": "select",
+				"options": [
+					"SQL API",
+					"MongoDB API"
+				],
+				"disabledOption": false
+			},
+			{
+				"propertyName": "Default consistency policy",
+				"propertyKeyword": "defaultConsistency",
+				"shouldValidate": false,
+				"propertyTooltip": "Default consistency policy level",
+				"propertyType": "select",
+				"options": [
+					"Session",
+					"Strong",
+					"Bounded staleness",
+					"Consistent prefix",
+					"Eventual"
+				],
+				"disabledOption": false
+			},
+			{
+				"propertyName": "Comments",
+				"propertyKeyword": "comments",
+				"shouldValidate": false,
+				"propertyTooltip": "comments",
+				"propertyType": "details",
+				"template": "textarea"
+			}
+		]
+	}
+]
