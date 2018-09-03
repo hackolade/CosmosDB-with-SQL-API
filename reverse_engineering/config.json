@@ -3,5 +3,6 @@
 		"NO_DATABASES": "There are no databases in the Cosmos DB instance",
 		"WRONG_CONNECTION": "Can not connect to the Cosmos DB instance"
 	},
-	"excludeDocKind": ["id"]
+	"excludeDocKind": ["id"],
+	"scenario": "getDatabases"
 }

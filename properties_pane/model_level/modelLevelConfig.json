@@ -181,9 +181,10 @@ making sure that you maintain a proper JSON format.
 				"propertyType": "select",
 				"options": [
 					"SQL API",
+					"Table API",
 					"MongoDB API"
 				],
-				"disabledOption": false
+				"disabledOption": true
 			},
 			{
 				"propertyName": "Default consistency policy",
