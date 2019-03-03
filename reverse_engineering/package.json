@@ -7,5 +7,5 @@
     "async": "^2.5.0",
     "documentdb": "1.12.2"
   },
-  "installed": false
+  "installed": true
 }
