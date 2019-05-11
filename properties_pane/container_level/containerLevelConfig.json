@@ -1,5 +1,5 @@
 /*
-* Copyright © 2016-2017 by IntegrIT S.A. dba Hackolade.  All rights reserved.
+* Copyright © 2016-2019 by IntegrIT S.A. dba Hackolade.  All rights reserved.
 *
 * The copyright to the computer software herein is the property of IntegrIT S.A.
 * The software may be used and/or copied only with the written permission of 
@@ -57,7 +57,6 @@ making sure that you maintain a proper JSON format.
 				"propertyName": "Group",
 				"propertyType": "group",
 				"propertyKeyword": "grpProp",
-				"shouldValidate": true,
 				"propertyTooltip": "",
 				"structure": [
 					{
@@ -76,10 +75,55 @@ making sure that you maintain a proper JSON format.
 						"allowNegative": false
 					}
 				]
+			},
+// “groupInput” can have the following states - 0 items, 1 item, and many items.
+// “blockInput” has only 2 states - 0 items or 1 item. 
+// This gives us an easy way to represent it as an object and not as an array internally which is beneficial for processing 
+// and forward-engineering in particular.
+			{
+				"propertyName": "Block",
+				"propertyType": "block",
+				"propertyKeyword": "grpProp",
+				"shouldValidate": false,
+				"propertyTooltip": "",
+				"structure": [
+					{
+						"propertyName": "Simple Grp Text",
+						"propertyKeyword": "simpleGrpText",
+						"shouldValidate": false,
+						"propertyTooltip": "",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Group Number",
+						"propertyKeyword": "grpNumber",
+						"propertyValidate": true,
+						"propertyType": "numeric",
+						"valueType": "number",
+						"allowNegative": false
+					}
+				]
+			},
+			{
+				"propertyName": "Field List",
+				"propertyKeyword": "keyList",
+				"shouldValidate": false,
+				"propertyType": "fieldList",
+				"template": "orderedList"
+			}, 
+			{
+				"propertyName": "List with attribute",
+				"propertyKeyword": "keyListOrder",
+				"shouldValidate": false,
+				"propertyType": "fieldList",
+				"template": "orderedList",
+				"attributeList": [
+					"ascending",
+					"descending"
+				]
 			}
 
 */
-
 
 [
 	{
@@ -115,7 +159,6 @@ making sure that you maintain a proper JSON format.
 			{
 				"propertyName": "Description",
 				"propertyKeyword": "description",
-				"shouldValidate": false,
 				"propertyTooltip": "description",
 				"propertyType": "details",
 				"template": "textarea"
@@ -123,7 +166,6 @@ making sure that you maintain a proper JSON format.
 			{
 				"propertyName": "Storage Capacity",
 				"propertyKeyword": "storageCapacity",
-				"shouldValidate": false,
 				"propertyTooltip": "A database is a logical container of one or more collections",
 				"propertyType": "select",
 				"options": [
@@ -134,7 +176,6 @@ making sure that you maintain a proper JSON format.
 			{
 				"propertyName": "Throughput (RU/s)",
 				"propertyKeyword": "throughput",
-				"shouldValidate": true,
 				"propertyTooltip": "Each collection can be provisionned throughput in Request Units (RU) per second. 1 RU coresponds to the throughput of a read of a 1 KB document.",
 				"propertyType": "numeric",
 				"valueType": "number"
@@ -142,7 +183,6 @@ making sure that you maintain a proper JSON format.
 			{
 				"propertyName": "RU per minute",
 				"propertyKeyword": "rump",
-				"shouldValidate": false,
 				"propertyTooltip": "For each 100 RU per second provisioned, 1000 RU per minute can be provisioned.",
 				"propertyType": "select",
 				"options": [
@@ -153,7 +193,6 @@ making sure that you maintain a proper JSON format.
 			{
 				"propertyName": "Time to live",
 				"propertyKeyword": "TTL",
-				"shouldValidate": false,
 				"propertyTooltip": "Time to live",
 				"propertyType": "select",
 				"options": [
@@ -165,7 +204,6 @@ making sure that you maintain a proper JSON format.
 			{
 				"propertyName": "TTL default seconds",
 				"propertyKeyword": "TTLseconds",
-				"shouldValidate": true,
 				"propertyTooltip": "TTL in seconds if TTL is ON",
 				"propertyType": "numeric",
 				"valueType": "number"
@@ -173,11 +211,16 @@ making sure that you maintain a proper JSON format.
 			{
 				"propertyName": "Partition key",
 				"propertyKeyword": "partitionKey",
-				"shouldValidate": false,
 				"propertyTooltip": "The Partition Key is a string only used to automatically partition data among multiple servers for scalability.  Choose a JSON property name that has a wide range of values and is likely to have evenly distributed access patterns.",
 				"propertyType": "text",
 				"valueType": "string"
 			},
+			{
+				"propertyName": "Unique keys",
+				"propertyKeyword": "uniqueKey",
+				"propertyType": "fieldList",
+				"template": "orderedList"
+			}, 
 			{
 				"propertyName": "Comments",
 				"propertyKeyword": "comments",

@@ -1,5 +1,5 @@
 /*
-* Copyright © 2016-2017 by IntegrIT S.A. dba Hackolade.  All rights reserved.
+* Copyright © 2016-2019 by IntegrIT S.A. dba Hackolade.  All rights reserved.
 *
 * The copyright to the computer software herein is the property of IntegrIT S.A.
 * The software may be used and/or copied only with the written permission of 
@@ -57,7 +57,6 @@ making sure that you maintain a proper JSON format.
 				"propertyName": "Group",
 				"propertyType": "group",
 				"propertyKeyword": "grpProp",
-				"shouldValidate": true,
 				"propertyTooltip": "",
 				"structure": [
 					{
@@ -76,6 +75,52 @@ making sure that you maintain a proper JSON format.
 						"allowNegative": false
 					}
 				]
+			},
+// “groupInput” can have the following states - 0 items, 1 item, and many items.
+// “blockInput” has only 2 states - 0 items or 1 item. 
+// This gives us an easy way to represent it as an object and not as an array internally which is beneficial for processing 
+// and forward-engineering in particular.
+			{
+				"propertyName": "Block",
+				"propertyType": "block",
+				"propertyKeyword": "grpProp",
+				"shouldValidate": false,
+				"propertyTooltip": "",
+				"structure": [
+					{
+						"propertyName": "Simple Grp Text",
+						"propertyKeyword": "simpleGrpText",
+						"shouldValidate": false,
+						"propertyTooltip": "",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Group Number",
+						"propertyKeyword": "grpNumber",
+						"propertyValidate": true,
+						"propertyType": "numeric",
+						"valueType": "number",
+						"allowNegative": false
+					}
+				]
+			},
+			{
+				"propertyName": "Field List",
+				"propertyKeyword": "keyList",
+				"shouldValidate": false,
+				"propertyType": "fieldList",
+				"template": "orderedList"
+			}, 
+			{
+				"propertyName": "List with attribute",
+				"propertyKeyword": "keyListOrder",
+				"shouldValidate": false,
+				"propertyType": "fieldList",
+				"template": "orderedList",
+				"attributeList": [
+					"ascending",
+					"descending"
+				]
 			}
 
 */
@@ -87,25 +132,24 @@ making sure that you maintain a proper JSON format.
 			"name",
 			"schemaId",
 			"type",
+			"format",
+			"pattern",
+			"minLength",
+			"maxLength",
+			"default",
+			"enum",
+			"required",
 			"description",
 			"dependencies",
-			"required",
 			"primaryKey",
 			"foreignCollection",
 			"foreignField",
 			"relationshipType",
-			"default",
-			"minLength",
-			"maxLength",
-			"pattern",
-			"format",
-			"enum",
 			"sample",
 			"comments",
 			{
 				"propertyName": "Other Attribute",
 				"propertyKeyword": "otherAttrib",
-				"shouldValidate": false,
 				"propertyType": "text",
 				"arrayItemDisabled": true,
 				"enableForReference": true,
@@ -123,29 +167,81 @@ making sure that you maintain a proper JSON format.
 			"name",
 			"schemaId",
 			"type",
-			"description",
-			"dependencies",
-			"required",
-			"primaryKey",
-			"foreignCollection",
-			"foreignField",
-			"relationshipType",
-			"default",
-			"unit",
 			"minimum",
 			"exclusiveMinimum",
 			"maximum",
 			"exclusiveMaximum",
 			"multipleOf",
 			"divisibleBy",
+			"unit",
+			"default",
 			"enum",
+			"required",
+			"description",
+			"dependencies",
+			"primaryKey",
+			"foreignCollection",
+			"foreignField",
+			"relationshipType",
 			"sample",
 			"comments"
 		],
-		"boolean": "boolean",
-		"binary": "binary",
-		"object": "document",
-		"array": "array",
-		"null": "null"
+		"boolean": [
+			"name",
+			"code",
+			"schemaId",
+			"type",
+			"default",
+			"required",
+			"description",
+			"dependencies",
+			"sample",
+			"comments"
+		],
+		"binary": [
+			"name",
+			"code",
+			"schemaId",
+			"type",
+			"required",
+			"description",
+			"dependencies",
+			"sample",
+			"comments"
+		],
+		"object": [
+			"name",
+			"code",
+			"schemaId",
+			"type",
+			"required",
+			"minProperties",
+			"maxProperties",
+			"description",
+			"dependencies",
+			"additionalProperties",
+			"comments"
+		],
+		"array": [
+			"name",
+			"code",
+			"schemaId",
+			"type",
+			"minItems",
+			"maxItems",
+			"uniqueItems",
+			"description",
+			"dependencies",
+			"required",
+			"additionalItems",
+			"comments"
+		],
+		"null": [
+			"name",
+			"code",
+			"schemaId",
+			"type",
+			"comments"
+		]
 	}
 }
