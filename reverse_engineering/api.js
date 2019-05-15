@@ -146,6 +146,7 @@ module.exports = {
 	},
 
 	getDbCollectionsData: function(data, logger, cb){
+		logger.progress = logger.progress || (() => {});
 		client = setUpDocumentClient(data);
 		logger.log('info', data, 'Reverse-Engineering connection settings', data.hiddenKeys);
 
@@ -159,10 +160,12 @@ module.exports = {
 
 		readDatabaseById(data.database, (err, database) => {
 			if(err){
-				console.log(err);
+				logger.progress({ message: 'Error of connecting to the database ' + data.database + '.\n ' + err.message, containerName: data.database, entityName: '' });											
 				logger.log('error', err);
 				return cb(err)
 			} else {
+				logger.progress({ message: 'Connected to the database ' + data.database, containerName: data.database, entityName: '' });
+
 				let modelInfo = {
 					dbId: database.id,
 					accountID: data.accountKey
@@ -170,7 +173,6 @@ module.exports = {
 
 				client.getDatabaseAccount((err, accountInfo, accountInfo2) => {
 					if(err){
-						console.log(err);
 						logger.log('error', err);
 					} else{
 						modelInfo.defaultConsistency = accountInfo.ConsistencyPolicy.defaultConsistencyLevel;
@@ -181,19 +183,23 @@ module.exports = {
 						async.map(bucketList, (bucketName, collItemCallback) => {
 							readCollectionById(database.id, bucketName, (err, collection) => {
 								if(err){
-									console.log(err);
+									logger.progress({ message: 'The error of reading the collection ' + bucketName + ' has occurred.\n ' + err.message, containerName: data.database, entityName: bucketName });											
 									logger.log('error', err);
 									return collItemCallback(err);
 								} else {
+									logger.progress({ message: 'The collection ' + bucketName + ' has loaded', containerName: data.database, entityName: bucketName });
+
 									getOfferType(collection, (err, info) => {
 										if(err){
-											console.log(err);
+											logger.progress({ message: 'The error of getting offers from the collection ' + bucketName + ' has occurred. \n' + err.message, containerName: data.database, entityName: bucketName });											
 											logger.log('error', err);
 											return collItemCallback(err);
 										} else {
 											let bucketInfo = {
 												throughput: info.content.offerThroughput,
-												rump: info.content.offerIsRUPerMinuteThroughputEnabled ? 'OFF' : 'On'
+												rump: info.content.offerIsRUPerMinuteThroughputEnabled ? 'OFF' : 'On',
+												partitionKey: getPartitionKey(collection),
+												uniqueKey: getUniqueKeys(collection)
 		 									};
 
 		 									let indexes = getIndexes(collection.indexingPolicy);
@@ -201,20 +207,20 @@ module.exports = {
 		 									let amount = 1000;
 		 									documentsAmount(collection._self, (err, result) => {
 		 										if(err){
-		 											// console.log(err);
-		 											// logger.log('error', err);
-		 											// return collItemCallback(err, null);
+													logger.progress({ message: 'The error of getting amount of documents from the collection ' + bucketName + ' has occurred.\n ' + err.message, containerName: data.database, entityName: bucketName });
 		 										} else {
 		 											amount = result[0].$1;
 		 										}
 	 											let size = getSampleDocSize(amount, recordSamplingSettings) || 1000;
 
+												logger.progress({ message: 'Load documents...', containerName: data.database, entityName: bucketName });
 												listDocuments(collection._self, size, (err, documents) => {
 													if(err){
-														console.log(err);
+														logger.progress({ message: 'Error has occurred during the loading of documents.\n ' + err.message, containerName: data.database, entityName: bucketName });
 														logger.log('error', err);
 														return collItemCallback(err);
 													} else {
+														logger.progress({ message: 'Documents have loaded.', containerName: data.database, entityName: bucketName });
 														documents = filterDocuments(documents);
 														let documentKindName = data.documentKinds[collection.id].documentKindName || '*';
 														let docKindsList = data.collectionData.collections[bucketName];
@@ -288,7 +294,6 @@ module.exports = {
 							});
 						}, (err, items) => {
 							if(err){
-								console.log(err);
 								logger.log('error', err);
 							}
 							return cb(err, items, modelInfo);
@@ -579,6 +584,37 @@ function getIndexes(indexingPolicy){
 	}
 
 	return generalIndexes;
+}
+
+function getPartitionKey(collection) {
+	if (!collection.partitionKey) {
+		return '';
+	}
+	if (!Array.isArray(collection.partitionKey.paths)) {
+		return '';
+	}
+	
+	return collection.partitionKey.paths.join(',');
+}
+
+function getUniqueKeys(collection) {
+	if (!collection.uniqueKeyPolicy) {
+		return [];
+	}
+
+	if (!Array.isArray(collection.uniqueKeyPolicy.uniqueKeys)) {
+		return [];
+	}
+
+	return collection.uniqueKeyPolicy.uniqueKeys.map(item => {
+		if (!Array.isArray(item.paths)) {
+			return;
+		}
+
+		return {
+			attributePath: item.paths.join(',')
+		};
+	}).filter(Boolean);
 }
 
 function getSamplingInfo(recordSamplingSettings, fieldInference){
