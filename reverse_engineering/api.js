@@ -193,7 +193,9 @@ module.exports = {
 										} else {
 											let bucketInfo = {
 												throughput: info.content.offerThroughput,
-												rump: info.content.offerIsRUPerMinuteThroughputEnabled ? 'OFF' : 'On'
+												rump: info.content.offerIsRUPerMinuteThroughputEnabled ? 'OFF' : 'On',
+												partitionKey: getPartitionKey(collection),
+												uniqueKey: getUniqueKeys(collection)
 		 									};
 
 		 									let indexes = getIndexes(collection.indexingPolicy);
@@ -579,6 +581,37 @@ function getIndexes(indexingPolicy){
 	}
 
 	return generalIndexes;
+}
+
+function getPartitionKey(collection) {
+	if (!collection.partitionKey) {
+		return '';
+	}
+	if (!Array.isArray(collection.partitionKey.paths)) {
+		return '';
+	}
+	
+	return collection.partitionKey.paths.join(',');
+}
+
+function getUniqueKeys(collection) {
+	if (!collection.uniqueKeyPolicy) {
+		return [];
+	}
+
+	if (!Array.isArray(collection.uniqueKeyPolicy.uniqueKeys)) {
+		return [];
+	}
+
+	return collection.uniqueKeyPolicy.uniqueKeys.map(item => {
+		if (!Array.isArray(item.paths)) {
+			return;
+		}
+
+		return {
+			attributePath: item.paths.join(',')
+		};
+	}).filter(Boolean);
 }
 
 function getSamplingInfo(recordSamplingSettings, fieldInference){

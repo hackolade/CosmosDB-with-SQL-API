@@ -218,8 +218,13 @@ making sure that you maintain a proper JSON format.
 			{
 				"propertyName": "Unique keys",
 				"propertyKeyword": "uniqueKey",
-				"propertyType": "fieldList",
-				"template": "orderedList"
+				"propertyType": "group",
+				"structure": [{
+					"propertyName": "Attribute path",
+					"propertyKeyword": "attributePath",
+					"propertyTooltip": "Comma separated paths",
+					"propertyType": "text"
+				}]
 			}, 
 			{
 				"propertyName": "Comments",
