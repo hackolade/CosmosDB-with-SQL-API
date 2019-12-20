@@ -4,8 +4,8 @@
   "description": "",
   "author": "Hackolade",
   "dependencies": {
-    "async": "^2.5.0",
-    "documentdb": "1.12.2"
+    "@azure/cosmos": "^3.5.2",
+    "lodash": "^4.17.15"
   },
   "installed": true
 }

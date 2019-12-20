@@ -15,11 +15,11 @@
 		"apiExperience": "SQL API"
 	},
 	"container": {
-		"name": "New collection",
+		"name": "New container",
 		"indexes": []
 	},
 	"collection": {
-		"collectionName": "New document type",
+		"collectionName": "New item type",
 		"collectionUsers": [],
 		"collation": {}
 	},

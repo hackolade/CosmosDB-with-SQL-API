@@ -129,8 +129,8 @@ making sure that you maintain a proper JSON format.
 	{
 		"lowerTab": "Details",
 		"containerLevelKeys": [{
-			"labelName": "Document key",
-			"propertyName": "Document key",
+			"labelName": "Item key",
+			"propertyName": "Item key",
 			"propertyKeyword": "id",
 			"defaultName": "id",
 			"propertyPrimaryKey": true,
@@ -140,8 +140,8 @@ making sure that you maintain a proper JSON format.
 			"defaultType": "string",
 			"disabledFieldOption": true
 		},{
-			"labelName": "Document type",
-			"propertyName": "Doc type field name",
+			"labelName": "Item type",
+			"propertyName": "Item type field name",
 			"propertyKeyword": "docType",
 			"defaultName": "type",
 			"propertyPrimaryKey": false,
@@ -166,7 +166,7 @@ making sure that you maintain a proper JSON format.
 			{
 				"propertyName": "Storage Capacity",
 				"propertyKeyword": "storageCapacity",
-				"propertyTooltip": "A database is a logical container of one or more collections",
+				"propertyTooltip": "A database is a logical container of one or more containers",
 				"propertyType": "select",
 				"options": [
 					"Fixed (10GB)",
@@ -176,7 +176,7 @@ making sure that you maintain a proper JSON format.
 			{
 				"propertyName": "Throughput (RU/s)",
 				"propertyKeyword": "throughput",
-				"propertyTooltip": "Each collection can be provisionned throughput in Request Units (RU) per second. 1 RU coresponds to the throughput of a read of a 1 KB document.",
+				"propertyTooltip": "Each container can be provisioned throughput in Request Units (RU) per second. 1 RU corresponds to the throughput of a read of a 1 KB document.",
 				"propertyType": "numeric",
 				"valueType": "number"
 			},

@@ -1,326 +1,234 @@
 'use strict';
 
-const documentClient = require("documentdb").DocumentClient;
-const lib = require("./node_modules/documentdb/lib/");
-const documentBase = lib.DocumentBase;
-const async = require('async');
+const { CosmosClient } = require('@azure/cosmos');
 const _ = require('lodash');
-var client;
+let client;
 
 module.exports = {
-	connect: function(connectionInfo, logger, cb){
+	connect: function(connectionInfo, logger, cb) {
 		cb()
 	},
 
-	disconnect: function(connectionInfo, logger, cb){
+	disconnect: function(connectionInfo, logger, cb) {
 		cb()
 	},
 
-	testConnection: function(connectionInfo, logger, cb){
+	testConnection: async function(connectionInfo, logger, cb) {
 		logger.clear();
-		let timeoutResponse = setTimeout(() => {
-			timeoutResponse = null;
-			return cb(true);
-
-		}, 10000);
-
-		this.getDatabases(connectionInfo, logger, (err, data) => {
-			if (timeoutResponse) {
-				clearTimeout(timeoutResponse);
-				
-				if(err){
-					return cb(true);
-				} else {
-					return cb(false);
-				}
-			} 
-		});
+		client = setUpDocumentClient(connectionInfo);
+		try {
+			await getDatabasesData();
+			return cb();
+		} catch(err) {
+			return cb(mapError(err));
+		}
 	},
 
-	getDatabases: function(connectionInfo, logger, cb){
+	getDatabases: async function(connectionInfo, logger, cb) {
 		client = setUpDocumentClient(connectionInfo);
 		logger.clear();
 		logger.log('info', connectionInfo, 'Reverse-Engineering connection settings', connectionInfo.hiddenKeys);
 
-		listDatabases((err, dbs) => {
-			if(err){
-				logger.log('error', err);
-				return cb(err);
-			} else {
-				dbs = dbs.map(item => item.id);
-				logger.log('info', dbs, 'All databases list', connectionInfo.hiddenKeys);
-				return cb(err, dbs);
-			}
-		});
+		try {
+			const dbsData = await getDatabasesData();
+			const dbs = dbsData.map(item => item.id);
+			logger.log('info', dbs, 'All databases list', connectionInfo.hiddenKeys);
+			return cb(null, dbs);
+		} catch(err) {
+			logger.log('error', err);
+			return cb(mapError(err));
+		}
 	},
 
-	getDocumentKinds: function(connectionInfo, logger, cb) {
+	getDocumentKinds: async function(connectionInfo, logger, cb) {
 		client = setUpDocumentClient(connectionInfo);
 		logger.log('info', connectionInfo, 'Reverse-Engineering connection settings', connectionInfo.hiddenKeys);
+		
+		try {
+			const collections = await listCollections(connectionInfo.database);
+			logger.log('collections list', collections, 'Mapped collection list');
+			const documentKindsPromise = collections.map(async collectionData => {
+				const containerInstance = client.database(connectionInfo.database).container(collectionData.id);
 
-		readDatabaseById(connectionInfo.database, (err, database) => {
-			if(err){
-				console.log(err);
-				logger.log('error', err);
-			} else {
-				listCollections(database._self, (err, collections) => {
-					if(err){
-						console.log(err);
-						logger.log('error', err);
-						return dbItemCallback(err)
-					} else {
-						logger.log('collections list', collections, 'Mapped collection list');
-						async.map(collections, (collectionItem, collItemCallback) => {
-							readCollectionById(database.id, collectionItem.id, (err, collection) => {
-								let amount = 1000;
-								if(err){
-									console.log(err);
-									logger.log('error', err);
-								} else {
-									documentsAmount(collection._self, (err, result) => {
-										if(err){
-											// console.log(err);
-											// logger.log('error', err);
-											// return collItemCallback(err, null);
-										} else {
-											amount = result[0].$1;
-										}
-										let size = getSampleDocSize(amount, connectionInfo.recordSamplingSettings) || 1000;
-										logger.log('info', { collectionItem: collectionItem }, 'Getting documents for current collectionItem', connectionInfo.hiddenKeys);
+				const documentsAmount = await getDocumentsAmount(containerInstance);
+				const size = getSampleDocSize(documentsAmount, connectionInfo.recordSamplingSettings) || 1000;
+				logger.log('info', { collectionItem: collectionData }, 'Getting documents for current collectionItem', connectionInfo.hiddenKeys);
 
-										listDocuments(collection._self, size, (err, documents) => {
-											if(err){
-												console.log(err);
-												logger.log('error', err);
-												return collItemCallback(err, null);
-											} else {
-												documents  = filterDocuments(documents);
+				const documents = await getDocuments(containerInstance, size);
+				const filteredDocuments = filterDocuments(documents);
 
-												let inferSchema = generateCustomInferSchema(collectionItem.id, documents, { sampleSize: 20 });
-												let documentsPackage = getDocumentKindDataFromInfer({ bucketName: collectionItem.id,
-													inference: inferSchema, isCustomInfer: true, excludeDocKind: connectionInfo.excludeDocKind }, 90);
+				const inferSchema = generateCustomInferSchema(filteredDocuments, { sampleSize: 20 });
+				const documentsPackage = getDocumentKindDataFromInfer({ bucketName: collectionData.id,
+					inference: inferSchema, isCustomInfer: true, excludeDocKind: connectionInfo.excludeDocKind }, 90);
 
-												return collItemCallback(err, documentsPackage);
-											}
-										});
-									});
-								}
-							});
-						}, (err, items) => {
-							if(err){
-								logger.log('error', err);
-								console.log(err);
-							}
-							return cb(err, items);
-						});
-					}
-				});
-			}
-		});
+				return documentsPackage;
+			});
+			const documentKinds = await Promise.all(documentKindsPromise);
+			cb(null, documentKinds);
+		} catch(err) {
+			console.log(err);
+			logger.log('error', err);
+			return cb(mapError(err));
+		}
 	},
 
-	getDbCollectionsNames: function(connectionInfo, logger, cb) {
-		client = setUpDocumentClient(connectionInfo);
-		logger.log('info', connectionInfo, 'Reverse-Engineering connection settings', connectionInfo.hiddenKeys);
-
-		readDatabaseById(connectionInfo.database, (err, database) => {
-			if(err){
-				console.log(err);
-				logger.log('error', err);
-				return cb(err)
-			} else {
-				logger.log('info', { Database: database.id }, 'Getting collections list for current database', connectionInfo.hiddenKeys);
-				listCollections(database._self, (err, collections) => {
-					if(err){
-						console.log(err);
-						logger.log('error', err);
-						return cb(err)
-					} else {
-						let collectionNames = collections.map(item => item.id);
-						logger.log('info', { CollectionList: collections }, 'Collection list for current database', connectionInfo.hiddenKeys);
-						handleBucket(connectionInfo, collectionNames, database, cb);
-					}
-				});
-			}
-		});
+	getDbCollectionsNames: async function(connectionInfo, logger, cb) {
+		try {
+			client = setUpDocumentClient(connectionInfo);
+			logger.log('info', connectionInfo, 'Reverse-Engineering connection settings', connectionInfo.hiddenKeys);
+			
+			logger.log('info', { Database: connectionInfo.database }, 'Getting collections list for current database', connectionInfo.hiddenKeys);
+			const collections = await listCollections(connectionInfo.database);
+			
+			logger.log('info', { CollectionList: collections }, 'Collection list for current database', connectionInfo.hiddenKeys);
+			const collectionNames = collections.map(item => item.id);
+			
+			const items = await handleBucket(connectionInfo, collectionNames);
+			cb(null, items)
+		} catch(err) {
+			console.log(err);
+			logger.log('error', err);
+			return cb(mapError(err));
+		}
 	},
 
-	getDbCollectionsData: function(data, logger, cb){
-		logger.progress = logger.progress || (() => {});
-		client = setUpDocumentClient(data);
-		logger.log('info', data, 'Reverse-Engineering connection settings', data.hiddenKeys);
+	getDbCollectionsData: async function(data, logger, cb) {
+		try {
+			logger.progress = logger.progress || (() => {});
+			client = setUpDocumentClient(data);
+			logger.log('info', data, 'Reverse-Engineering connection settings', data.hiddenKeys);
 
-		let includeEmptyCollection = data.includeEmptyCollection;
-		let { recordSamplingSettings, fieldInference } = data;
-		logger.log('info', getSamplingInfo(recordSamplingSettings, fieldInference), 'Reverse-Engineering sampling params', data.hiddenKeys);
+			const { recordSamplingSettings, fieldInference } = data;
+			logger.log(
+				'info',
+				getSamplingInfo(recordSamplingSettings, fieldInference),
+				'Reverse-Engineering sampling params',
+				data.hiddenKeys
+			);
 
-		let bucketList = data.collectionData.dataBaseNames;
+			const bucketList = data.collectionData.dataBaseNames;
+			logger.log('info', { CollectionList: bucketList }, 'Selected collection list', data.hiddenKeys);
 
-		logger.log('info', { CollectionList: bucketList }, 'Selected collection list', data.hiddenKeys);
+			const modelInfo = {
+				dbId: data.database,
+				accountID: data.accountKey
+			};
 
-		readDatabaseById(data.database, (err, database) => {
-			if(err){
-				logger.progress({ message: 'Error of connecting to the database ' + data.database + '.\n ' + err.message, containerName: data.database, entityName: '' });											
-				logger.log('error', err);
-				return cb(err)
-			} else {
-				logger.progress({ message: 'Connected to the database ' + data.database, containerName: data.database, entityName: '' });
+			const { resource: accountInfo } = await client.getDatabaseAccount();
 
-				let modelInfo = {
-					dbId: database.id,
-					accountID: data.accountKey
+			modelInfo.defaultConsistency = accountInfo.consistencyPolicy;
+			modelInfo.preferredLocation = accountInfo.writableLocations[0] ? accountInfo.writableLocations[0].name : '';
+
+			logger.log('info', modelInfo, 'Model info', data.hiddenKeys);
+			const dbCollectionsPromise = bucketList.map(async bucketName => {
+				const containerInstance = client.database(data.database).container(bucketName);
+				const collection = await getCollectionById(containerInstance);
+				const offerInfo = await getOfferType(collection);
+				const bucketInfo = {
+					throughput: offerInfo ? offerInfo.content.offerThroughput : '',
+					rump: offerInfo && offerInfo.content.offerIsRUPerMinuteThroughputEnabled ? 'OFF' : 'On',
+					partitionKey: getPartitionKey(collection),
+					uniqueKey: getUniqueKeys(collection)
 				};
+				const indexes = getIndexes(collection.indexingPolicy);
 
-				client.getDatabaseAccount((err, accountInfo, accountInfo2) => {
-					if(err){
-						logger.log('error', err);
-					} else{
-						modelInfo.defaultConsistency = accountInfo.ConsistencyPolicy.defaultConsistencyLevel;
-						modelInfo.preferredLocation = (accountInfo.WritableLocations[0]) ? accountInfo.WritableLocations[0].name : '';
+				const documentsAmount = await getDocumentsAmount(containerInstance);
+				const size = getSampleDocSize(documentsAmount, recordSamplingSettings) || 1000;
 
-						logger.log('info', modelInfo, 'Model info', data.hiddenKeys);
+				logger.progress({ message: 'Load documents...', containerName: data.database, entityName: bucketName });
+				const documents = await getDocuments(containerInstance, size);
+				logger.progress({
+					message: 'Documents have loaded.',
+					containerName: data.database,
+					entityName: bucketName
+				});
+				const filteredDocuments = filterDocuments(documents);
+				const documentKindName = data.documentKinds[collection.id].documentKindName || '*';
+				const docKindsList = data.collectionData.collections[bucketName];
+				const collectionPackages = [];
 
-						async.map(bucketList, (bucketName, collItemCallback) => {
-							readCollectionById(database.id, bucketName, (err, collection) => {
-								if(err){
-									logger.progress({ message: 'The error of reading the collection ' + bucketName + ' has occurred.\n ' + err.message, containerName: data.database, entityName: bucketName });											
-									logger.log('error', err);
-									return collItemCallback(err);
-								} else {
-									logger.progress({ message: 'The collection ' + bucketName + ' has loaded', containerName: data.database, entityName: bucketName });
-
-									getOfferType(collection, (err, info) => {
-										if(err){
-											logger.progress({ message: 'The error of getting offers from the collection ' + bucketName + ' has occurred. \n' + err.message, containerName: data.database, entityName: bucketName });											
-											logger.log('error', err);
-											return collItemCallback(err);
-										} else {
-											let bucketInfo = {
-												throughput: info.content.offerThroughput,
-												rump: info.content.offerIsRUPerMinuteThroughputEnabled ? 'OFF' : 'On',
-												partitionKey: getPartitionKey(collection),
-												uniqueKey: getUniqueKeys(collection)
-		 									};
-
-		 									let indexes = getIndexes(collection.indexingPolicy);
-
-		 									let amount = 1000;
-		 									documentsAmount(collection._self, (err, result) => {
-		 										if(err){
-													logger.progress({ message: 'The error of getting amount of documents from the collection ' + bucketName + ' has occurred.\n ' + err.message, containerName: data.database, entityName: bucketName });
-		 										} else {
-		 											amount = result[0].$1;
-		 										}
-	 											let size = getSampleDocSize(amount, recordSamplingSettings) || 1000;
-
-												logger.progress({ message: 'Load documents...', containerName: data.database, entityName: bucketName });
-												listDocuments(collection._self, size, (err, documents) => {
-													if(err){
-														logger.progress({ message: 'Error has occurred during the loading of documents.\n ' + err.message, containerName: data.database, entityName: bucketName });
-														logger.log('error', err);
-														return collItemCallback(err);
-													} else {
-														logger.progress({ message: 'Documents have loaded.', containerName: data.database, entityName: bucketName });
-														documents = filterDocuments(documents);
-														let documentKindName = data.documentKinds[collection.id].documentKindName || '*';
-														let docKindsList = data.collectionData.collections[bucketName];
-														let collectionPackages = [];
-
-														if(documentKindName !== '*'){
-															if(!docKindsList){
-																let documentsPackage = {
-																	dbName: bucketName,
-																	emptyBucket: true,
-																	indexes: [],
-																	bucketIndexes: indexes,
-																	views: [],
-																	validation: false,
-																	bucketInfo
-																};
-																collectionPackages.push(documentsPackage)
-															} else {
-																docKindsList.forEach(docKindItem => {
-																	let newArrayDocuments = documents.filter((item) => {
-																		return item[documentKindName] == docKindItem;
-																	});
-
-																	let documentsPackage = {
-																		dbName: bucketName,
-																		collectionName: docKindItem,
-																		documents: newArrayDocuments || [],
-																		indexes: [],
-																		bucketIndexes: indexes,
-																		views: [],
-																		validation: false,
-																		docType: documentKindName,
-																		bucketInfo
-																	};
-
-																	if(fieldInference.active === 'field'){
-																		documentsPackage.documentTemplate = newArrayDocuments[0] || null;
-																	}
-
-																	collectionPackages.push(documentsPackage)
-																});
-															}
-														} else {
-															let documentsPackage = {
-																dbName: bucketName,
-																collectionName: bucketName,
-																documents: documents || [],
-																indexes: [],
-																bucketIndexes: indexes,
-																views: [],
-																validation: false,
-																docType: bucketName,
-																bucketInfo
-															};
-
-															if(fieldInference.active === 'field'){
-																documentsPackage.documentTemplate = documents[0] || null;
-															}
-
-															collectionPackages.push(documentsPackage)
-														}
-
-														return collItemCallback(err, collectionPackages);
-													}
-												});
-		 									});
-
-										}
-									})
-								}
+				if (documentKindName !== '*') {
+					if (!docKindsList) {
+						const documentsPackage = {
+							dbName: bucketName,
+							emptyBucket: true,
+							indexes: [],
+							bucketIndexes: indexes,
+							views: [],
+							validation: false,
+							bucketInfo
+						};
+						collectionPackages.push(documentsPackage);
+					} else {
+						docKindsList.forEach(docKindItem => {
+							const newArrayDocuments = filteredDocuments.filter(item => {
+								return item[documentKindName] == docKindItem;
 							});
-						}, (err, items) => {
-							if(err){
-								logger.log('error', err);
+
+							const documentsPackage = {
+								dbName: bucketName,
+								collectionName: docKindItem,
+								documents: newArrayDocuments || [],
+								indexes: [],
+								bucketIndexes: indexes,
+								views: [],
+								validation: false,
+								docType: documentKindName,
+								bucketInfo
+							};
+
+							if (fieldInference.active === 'field') {
+								documentsPackage.documentTemplate = newArrayDocuments[0] || null;
 							}
-							return cb(err, items, modelInfo);
+
+							collectionPackages.push(documentsPackage);
 						});
 					}
-				})
+				} else {
+					const documentsPackage = {
+						dbName: bucketName,
+						collectionName: bucketName,
+						documents: filteredDocuments || [],
+						indexes: [],
+						bucketIndexes: indexes,
+						views: [],
+						validation: false,
+						docType: bucketName,
+						bucketInfo
+					};
 
-			}
-		});
+					if (fieldInference.active === 'field') {
+						documentsPackage.documentTemplate = filteredDocuments[0] || null;
+					}
+
+					collectionPackages.push(documentsPackage);
+				}
+
+				return collectionPackages;
+			});
+
+			const dbCollections = await Promise.all(dbCollectionsPromise);
+			return cb(null, dbCollections, modelInfo);
+		} catch(err) {
+			logger.progress({
+				message: 'Error of connecting to the database ' + data.database + '.\n ' + err.message,
+				containerName: data.database,
+				entityName: ''
+			});
+			logger.log('error', err);
+			return cb(mapError(err));
+		}
 	}
 };
 
 
-function readCollectionById(dbLink, collectionId, callback) {
-	var collLink = `dbs/${dbLink}/colls/${collectionId}`;
-
-	client.readCollection(collLink, function (err, coll) {
-		if (err) {
-			return callback(err);
-		} else {
-			return callback(null, coll);
-		}
-	});
+async function getCollectionById(containerInstance) {
+	const { resource: collection } = await containerInstance.read();
+	return collection;
 }
 
-function getOfferType(collection, callback) {
-	var querySpec = {
+async function getOfferType(collection) {
+	const querySpec = {
 		query: 'SELECT * FROM root r WHERE  r.resource = @link',
 		parameters: [
 			{
@@ -329,77 +237,35 @@ function getOfferType(collection, callback) {
 			}
 		]
 	};
-
-	client.queryOffers(querySpec).toArray(function (err, offers) {
-		if (err) {
-			return callback(err);
-		} else if (offers.length === 0) {
-			return callback('No offer found for collection');
-		} else {
-			var offer = offers[0];
-			return callback(null, offer);
-		}
-	});
+	const { resources: offer } = await client.offers.query(querySpec).fetchAll();
+	return offer.length > 0 && offer[0];
 }
 
-function listDatabases(callback) {
-	var queryIterator = client.readDatabases().toArray(function (err, dbs) {
-		if (err) {
-			return callback(err);
-		}
-		return callback(null, dbs);
-	});
+async function getDatabasesData() {
+	const dbResponse = await client.databases.readAll().fetchAll();
+	return dbResponse.resources;
+
 }
 
-function listCollections(databaseLink, callback) {
-	var queryIterator = client.readCollections(databaseLink).toArray(function (err, cols) {
-		if (err) {
-			return callback(err);
-		} else {            
-			return callback(null, cols);
-		}
-	});
+async function listCollections(databaseId) {
+	const { resources: containers } = await client.database(databaseId).containers.readAll().fetchAll();
+	return containers;
 }
 
-function readDatabaseById(databaseId, callback) {
-	client.readDatabase('dbs/' + databaseId, function (err, db) {
-		if (err) {
-			return callback(err);
-		} else {
-			return callback(null, db);
-		}
-	});
+async function getDocuments(container, maxItemCount) {
+	const query = `SELECT TOP ${maxItemCount} * FROM c`;
+
+	const { resources: documents } = await container.items.query(query, { enableCrossPartitionQuery: true }).fetchAll();
+	return documents;
 }
 
-function listDocuments(collLink, maxItemCount, callback) {
-	const query = {
-		"query": `SELECT TOP ${maxItemCount} * FROM c`
-	};
-
-	var queryIterator = client.queryDocuments(collLink, query, { enableCrossPartitionQuery: true }).toArray(function (err, docs) {
-		if (err) {
-			return callback(err);
-		} else {
-			return callback(null, docs);
-		}
-	});
+async function getDocumentsAmount(container) {
+	const query = `SELECT COUNT(1) FROM c`;
+	const { resources: amount } = await container.items.query(query, { enableCrossPartitionQuery: true }).fetchAll();
+	return amount[0].$1;
 }
 
-function documentsAmount(collLink, callback) {
-	const query = {
-			"query": `SELECT COUNT(1) FROM c`
-	};
-
-	var queryIterator = client.queryDocuments(collLink, query, { enableCrossPartitionQuery: true }).toArray(function (err, docs) {
-		if (err) {
-			return callback(err);
-		} else {
-			return callback(null, docs);
-		}
-	});
-}
-
-function filterDocuments(documents){
+function filterDocuments(documents) {
 	return documents.map(item =>{
 		for(let prop in item){
 			if(prop && prop[0] === '_'){
@@ -410,7 +276,7 @@ function filterDocuments(documents){
 	});
 }
 
-function generateCustomInferSchema(bucketName, documents, params){
+function generateCustomInferSchema(documents, params) {
 	function typeOf(obj) {
 		return {}.toString.call(obj).split(' ')[1].slice(0, -1).toLowerCase();
 	};
@@ -495,59 +361,33 @@ function getDocumentKindDataFromInfer(data, probability){
 	return documentKindData;
 }
 
-function handleBucket(connectionInfo, collectionNames, database, dbItemCallback){
-	async.map(collectionNames, (collectionName, collItemCallback) => {
-		readCollectionById(database.id, collectionName, (err, collection) => {
-			if(err){
-				console.log(err);
-				logger.log('error', err);
-				collItemCallback(err);
-			} else {
-				let amount = 1000;
-				documentsAmount(collection._self, (err, result) => {
-					if(err){
-						// console.log(err);
-						// logger.log('error', err);
-						// return collItemCallback(err, null);
-					} else {
-						amount = result[0].$1;
-					}
-					let size = getSampleDocSize(amount, connectionInfo.recordSamplingSettings) || 1000;
+async function handleBucket(connectionInfo, collectionsIds){
+	const bucketItemsPromise = collectionsIds.map(async collectionId => {
+		const containerInstance = client.database(connectionInfo.database).container(collectionId);
 
-					listDocuments(collection._self, size, (err, documents) => {
-						if(err){
-							console.log(err);
-							return collItemCallback(err);
-						} else {
-							documents  = filterDocuments(documents);
-							let documentKind = connectionInfo.documentKinds[collection.id].documentKindName || '*';
-							let documentTypes = [];
+		const documentsAmount = await getDocumentsAmount(containerInstance);
+		const size = getSampleDocSize(documentsAmount, connectionInfo.recordSamplingSettings) || 1000;
 
-							if(documentKind !== '*'){
-								documentTypes = documents.map(function(doc){
-									return doc[documentKind];
-								});
-								documentTypes = documentTypes.filter((item) => Boolean(item));
-								documentTypes = _.uniq(documentTypes);
-							}
+		const documents = await getDocuments(containerInstance, size);
+		const filteredDocuments = filterDocuments(documents);
 
-							let dataItem = prepareConnectionDataItem(documentTypes, collection.id, database);
-							return collItemCallback(err, dataItem);
-						}
-					});
-				});
-			}
-		});
-	}, (err, items) => {
-		if(err){
-			console.log(err);
-			logger.log('error', err);
+		const documentKind = connectionInfo.documentKinds[collectionId].documentKindName || '*';
+		let documentTypes = [];
+
+		if(documentKind !== '*'){
+			documentTypes = filteredDocuments.map(doc => {
+				return doc[documentKind];
+			});
+			documentTypes = documentTypes.filter(item => Boolean(item));
+			documentTypes = _.uniq(documentTypes);
 		}
-		return dbItemCallback(err, items);
+
+		return prepareConnectionDataItem(documentTypes, collectionId);
 	});
+	return await Promise.all(bucketItemsPromise);
 }
 
-function prepareConnectionDataItem(documentTypes, bucketName, database){
+function prepareConnectionDataItem(documentTypes, bucketName){
 	let uniqueDocuments = _.uniq(documentTypes);
 	let connectionDataItem = {
 		dbName: bucketName,
@@ -569,7 +409,7 @@ function getIndexes(indexingPolicy){
 	
 	if(indexingPolicy){
 		indexingPolicy.includedPaths.forEach(item => {
-			let indexes = item.indexes;
+			let indexes = item.indexes || [];
 			indexes = indexes.map((index, i) => {
 				index.name = `New Index(${i+1})`,
 				index.indexPrecision = index.precision;
@@ -617,7 +457,7 @@ function getUniqueKeys(collection) {
 	}).filter(Boolean);
 }
 
-function getSamplingInfo(recordSamplingSettings, fieldInference){
+function getSamplingInfo(recordSamplingSettings, fieldInference) {
 	let samplingInfo = {};
 	let value = recordSamplingSettings[recordSamplingSettings.active].value;
 	let unit = (recordSamplingSettings.active === 'relative') ? '%' : ' records max';
@@ -630,9 +470,18 @@ function getEndpoint(data){
 	return data.host + ':' + data.port;
 }
 
-function setUpDocumentClient(connectionInfo){
-	let endpoint = getEndpoint(connectionInfo);
-	let connectionPolicy = new documentBase.ConnectionPolicy();
-	connectionPolicy.DisableSSLVerification = connectionInfo.disableSSL;
-	return new documentClient(endpoint, { "masterKey": connectionInfo.accountKey }, connectionPolicy);
+function setUpDocumentClient(connectionInfo) {
+	const endpoint = getEndpoint(connectionInfo);
+	const key = connectionInfo.accountKey;
+	if ((connectionInfo.disableSSL)) {
+		process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
+	}
+	return new CosmosClient({ endpoint, key });
+}
+
+function mapError(error) {
+	return {
+		message: error.message,
+		stack: error.stack
+	};
 }

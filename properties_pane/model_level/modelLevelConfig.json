@@ -172,7 +172,7 @@ making sure that you maintain a proper JSON format.
 				"propertyName": "Database ID",
 				"propertyKeyword": "dbId",
 				"shouldValidate": false,
-				"propertyTooltip": "A database is a logical container of one or more collections",
+				"propertyTooltip": "A database is a logical container of one or more containers",
 				"propertyType": "text"
 			},
 			{
