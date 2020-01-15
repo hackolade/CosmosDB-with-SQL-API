@@ -15,7 +15,7 @@
 				"inputLabel": "Disable SSL Authentication for local instance",
 				"inputKeyword": "disableSSL",
 				"inputType": "checkbox",
-				"inputTooltip": "Check this box if you want to connect to a local instance of DocumentDB"
+				"inputTooltip": "Check this box if you want to connect to a local instance of Cosmos DB"
 			},
 			{
 				"inputLabel": "Name",
@@ -28,14 +28,14 @@
 				"inputLabel": "Address",
 				"inputKeyword": "host",
 				"inputType": "text",
-				"inputTooltip": "Specify host IP address or DNS name of the DocumentDB instance",
+				"inputTooltip": "Specify host IP address or DNS name of the Cosmos DB instance",
 				"inputPlaceholder": "https://<databaseaccount>.documents.azure.com or https://localhost"
 			},
 			{
 				"inputLabel": "Port",
 				"inputKeyword": "port",
 				"inputType": "text",
-				"inputTooltip": "Specify the port number of the DocumentDB instance",
+				"inputTooltip": "Specify the port number of the Cosmos DB instance",
 				"inputPlaceholder": "443 for Azure instance, or 8081 for local instance"
 			},
 			{
@@ -45,6 +45,68 @@
 				"inputTooltip": "Paste the account Primary or Secondary (Read-Only) Key, or C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw== if local instance",
 				"isHiddenKey": true,
 				"defaultValue": ""
+			}
+		]
+	},
+	{
+		"lowerTab": "Control Plane parameters",
+		"structure": [
+			{
+				"inputLabel": "Enable REST API connection",
+				"inputKeyword": "includeAccountInformation",
+				"inputType": "checkbox",
+				"inputTooltip": "Check this box if you want to include Cosmos DB account information"
+			},
+			{
+				"inputLabel": "Resource group name",
+				"inputKeyword": "resourceGroupName",
+				"inputType": "text",
+				"inputTooltip": "Specify the Resource group name from the Overview screen of the Cosmos DB instance",
+				"dependency": {
+					"key": "includeAccountInformation",
+					"value": [true, "true"]
+				}
+			},
+			{
+				"inputLabel": "Subscription ID",
+				"inputKeyword": "subscriptionId",
+				"inputType": "text",
+				"inputTooltip": "Specify the Subscription ID from the Overview screen of the Cosmos DB instance",
+				"dependency": {
+					"key": "includeAccountInformation",
+					"value": [true, "true"]
+				}
+			},
+			{
+				"inputLabel": "Application (client) ID",
+				"inputKeyword": "clientId",
+				"inputType": "text",
+				"inputTooltip": "Azure Active Directory application id from the Overview screen of the App registration",
+				"dependency": {
+					"key": "includeAccountInformation",
+					"value": [true, "true"]
+				}
+			},
+			{
+				"inputLabel": "Directory (tenant) ID",
+				"inputKeyword": "tenantId",
+				"inputType": "text",
+				"inputTooltip": "Specify the Directory (tenant) ID from the Overview screen of the App registration",
+				"dependency": {
+					"key": "includeAccountInformation",
+					"value": [true, "true"]
+				}
+			},
+			{
+				"inputLabel": "Application secret",
+				"inputKeyword": "appSecret",
+				"inputType": "text",
+				"inputTooltip": "Specify the Application secret string",
+				"isHiddenKey": true,
+				"dependency": {
+					"key": "includeAccountInformation",
+					"value": [true, "true"]
+				}
 			}
 		]
 	}

@@ -169,13 +169,6 @@ making sure that you maintain a proper JSON format.
 				"propertyType": "text"
 			},
 			{
-				"propertyName": "Database ID",
-				"propertyKeyword": "dbId",
-				"shouldValidate": false,
-				"propertyTooltip": "A database is a logical container of one or more containers",
-				"propertyType": "text"
-			},
-			{
 				"propertyName": "Preferred location",
 				"propertyKeyword": "preferredLocation",
 				"shouldValidate": false,
@@ -245,6 +238,123 @@ making sure that you maintain a proper JSON format.
 					"Eventual"
 				],
 				"disabledOption": false
+			},
+			{
+				"propertyName": "Locations",
+				"propertyKeyword": "locations",
+				"shouldValidate": false,
+				"propertyTooltip": "List of locations enabled for the Cosmos DB account",
+				"propertyType": "group",
+				"structure": [
+					{
+						"propertyName": "Id",
+						"propertyKeyword": "locationId",
+						"shouldValidate": false,
+						"propertyTooltip": "The unique identifier of the region within the database account",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Name",
+						"propertyKeyword": "locationName",
+						"shouldValidate": false,
+						"propertyTooltip": "The name of the region",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Failover priority",
+						"propertyKeyword": "failoverPriority",
+						"shouldValidate": false,
+						"propertyTooltip": "The failover priority of the region",
+						"propertyType": "numeric",
+						"valueType": "number"
+					},
+					{
+						"propertyName": "Zone redundant",
+						"propertyKeyword": "isZoneRedundant",
+						"shouldValidate": false,
+						"propertyTooltip": "Flag to indicate whether or not this region is an AvailabilityZone region",
+						"propertyType": "checkbox"
+					}
+				]
+			},
+			{
+				"propertyName": "Enable multiple write locations",
+				"propertyKeyword": "enableMultipleWriteLocations",
+				"shouldValidate": false,
+				"propertyTooltip": "Enables the account to write in multiple locations",
+				"propertyType": "checkbox",
+				"disabledOption": false
+			},
+			{
+				"propertyName": "Enable automatic failover",
+				"propertyKeyword": "enableAutomaticFailover",
+				"shouldValidate": false,
+				"propertyTooltip": "Enables automatic failover of the write region in the rare event that the region is unavailable due to an outage",
+				"propertyType": "checkbox",
+				"disabledOption": false
+			},
+			{
+				"propertyName": "Virtual network filter enabled",
+				"propertyKeyword": "isVirtualNetworkFilterEnabled",
+				"shouldValidate": false,
+				"propertyTooltip": "Flag to indicate whether to enable/disable Virtual Network ACL rules",
+				"propertyType": "checkbox",
+				"disabledOption": false
+			},
+			{
+				"propertyName": "Virtual network rules",
+				"propertyKeyword": "virtualNetworkRules",
+				"shouldValidate": false,
+				"propertyTooltip": "List of Virtual Network ACL rules configured for the Cosmos DB account",
+				"propertyType": "group",
+				"structure": [
+					{
+						"propertyName": "Id",
+						"propertyKeyword": "virtualNetworkId",
+						"shouldValidate": false,
+						"propertyTooltip": "Resource ID of a subnet",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Ignore missing VNet endpoint",
+						"propertyKeyword": "ignoreMissingVNetServiceEndpoint",
+						"shouldValidate": false,
+						"propertyTooltip": "Create firewall rule before the virtual network has vnet service endpoint enabled",
+						"propertyType": "checkbox"
+					}
+				]
+			},
+			{
+				"propertyName": "IP-Range filter",
+				"propertyKeyword": "ipRangeFilter",
+				"shouldValidate": false,
+				"propertyTooltip": "This value specifies the set of IP addresses or IP address ranges in CIDR form to be included as the allowed list of client IPs for a given database account",
+				"propertyType": "details",
+				"template": "textarea",
+				"markdown": false
+			},
+			{
+				"propertyName": "Tags",
+				"propertyKeyword": "tags",
+				"shouldValidate": false,
+				"propertyTooltip": "A list of key-value pairs that describe the resource",
+				"propertyType": "group",
+				"structure": [
+					{
+						"propertyName": "Name",
+						"propertyKeyword": "tagName",
+						"shouldValidate": false,
+						"propertyTooltip": "Tag name",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Value",
+						"propertyKeyword": "tagValue",
+						"shouldValidate": false,
+						"propertyTooltip": "Tag value",
+						"propertyType": "text"
+					}
+				]
 			},
 			{
 				"propertyName": "Comments",

@@ -2,6 +2,8 @@
 
 const { CosmosClient } = require('@azure/cosmos');
 const _ = require('lodash');
+const axios = require('axios');
+const qs = require('qs');
 let client;
 
 module.exports = {
@@ -109,26 +111,37 @@ module.exports = {
 			const bucketList = data.collectionData.dataBaseNames;
 			logger.log('info', { CollectionList: bucketList }, 'Selected collection list', data.hiddenKeys);
 
-			const modelInfo = {
-				dbId: data.database,
-				accountID: data.accountKey
-			};
-
 			const { resource: accountInfo } = await client.getDatabaseAccount();
-
-			modelInfo.defaultConsistency = accountInfo.consistencyPolicy;
-			modelInfo.preferredLocation = accountInfo.writableLocations[0] ? accountInfo.writableLocations[0].name : '';
+			const additionalAccountInfo = await getAdditionalAccountInfo(data, logger);
+			const modelInfo = Object.assign({
+				accountID: data.accountKey,
+				defaultConsistency: accountInfo.consistencyPolicy,
+				preferredLocation: accountInfo.writableLocations[0] ? accountInfo.writableLocations[0].name : '',
+				tenant: data.tenantId,
+				resGrp: data.resourceGroupName,
+				subscription: data.subscriptionId
+			}, additionalAccountInfo);
 
 			logger.log('info', modelInfo, 'Model info', data.hiddenKeys);
 			const dbCollectionsPromise = bucketList.map(async bucketName => {
 				const containerInstance = client.database(data.database).container(bucketName);
+				const storedProcs = await getStoredProcedures(containerInstance);
+				const triggers = await getTriggers(containerInstance);
+				const udfs = await getUdfs(containerInstance);
 				const collection = await getCollectionById(containerInstance);
 				const offerInfo = await getOfferType(collection);
+				const { autopilot, throughput } = getOfferProps(offerInfo);
 				const bucketInfo = {
-					throughput: offerInfo ? offerInfo.content.offerThroughput : '',
-					rump: offerInfo && offerInfo.content.offerIsRUPerMinuteThroughputEnabled ? 'OFF' : 'On',
+					dbId: data.database,
+					throughput,
+					autopilot,
 					partitionKey: getPartitionKey(collection),
-					uniqueKey: getUniqueKeys(collection)
+					uniqueKey: getUniqueKeys(collection),
+					storedProcs,
+					triggers,
+					udfs,
+					TTL: getTTL(collection.defaultTtl),
+					TTLseconds: collection.defaultTtl
 				};
 				const indexes = getIndexes(collection.indexingPolicy);
 
@@ -254,8 +267,17 @@ async function listCollections(databaseId) {
 
 async function getDocuments(container, maxItemCount) {
 	const query = `SELECT TOP ${maxItemCount} * FROM c`;
-
-	const { resources: documents } = await container.items.query(query, { enableCrossPartitionQuery: true }).fetchAll();
+	let documents = [];
+	try {
+		const docRequest = container.items.query(query, { enableCrossPartitionQuery: true, maxItemCount: 200 });
+		while(docRequest.hasMoreResults()) {
+			const { resources: docs } = await docRequest.fetchNext();
+			documents = documents.concat(docs);
+		}
+	} catch(err) {
+		console.log(err);
+		logger.log('error', err);
+	}
 	return documents;
 }
 
@@ -405,25 +427,78 @@ function getSampleDocSize(count, recordSamplingSettings) {
 }
 
 function getIndexes(indexingPolicy){
-	let generalIndexes = [];
-	
-	if(indexingPolicy){
-		indexingPolicy.includedPaths.forEach(item => {
-			let indexes = item.indexes || [];
-			indexes = indexes.map((index, i) => {
-				index.name = `New Index(${i+1})`,
-				index.indexPrecision = index.precision;
-				index.automatic = item.automatic;
-				index.mode = indexingPolicy.indexingMode;
-				index.indexIncludedPath = item.path;
-				return index;
-			});
+	const rangeIndexes = getRangeIndexes(indexingPolicy);
+	const spatialIndexes = getSpatialIndexes(indexingPolicy);
+	const compositeIndexes = getCompositeIndexes(indexingPolicy);
 
-			generalIndexes = generalIndexes.concat(generalIndexes, indexes);
+	return rangeIndexes.concat(spatialIndexes).concat(compositeIndexes);
+}
+
+function getRangeIndexes(indexingPolicy) {
+	let rangeIndexes = [];
+	const excludedPaths = indexingPolicy.excludedPaths.map(({ path }) => path).join(', ');
+	
+	if(indexingPolicy) {
+		indexingPolicy.includedPaths.forEach((item, i) => {
+			if (item.indexes) {
+				const indexes = item.indexes.map((index, j) => {
+					return {
+						name: `New Index(${j+1})`,
+						indexPrecision: index.precision,
+						automatic: indexingPolicy.automatic,
+						mode: indexingPolicy.indexingMode,
+						indexIncludedPath: item.path,
+						indexExcludedPath: excludedPaths,
+						dataType: index.dataType,
+						kind: index.kind
+					};
+				});
+				rangeIndexes = rangeIndexes.concat(rangeIndexes, indexes);
+			} else {
+				const index = {
+					name: `New Index(${i+1})`,
+					automatic: indexingPolicy.automatic,
+					mode: indexingPolicy.indexingMode,
+					indexIncludedPath: item.path,
+					indexExcludedPath: excludedPaths,
+					kind: 'Range'
+				}
+				rangeIndexes.push(index);
+			}
 		});
 	}
+	return rangeIndexes;
+}
 
-	return generalIndexes;
+function getSpatialIndexes(indexingPolicy) {
+	if (!indexingPolicy.spatialIndexes) {
+		return [];
+	}
+	return indexingPolicy.spatialIndexes.map(item => {
+		return {
+			name: 'Spatial index',
+			automatic: indexingPolicy.automatic,
+			mode: indexingPolicy.indexingMode,
+			kind: 'Spatial',
+			indexIncludedPath: item.path,
+			dataTypes: item.types.map(type => ({ spatialType: type }))
+		};
+	});
+}
+
+function getCompositeIndexes(indexingPolicy) {
+	if (!indexingPolicy.compositeIndexes) {
+		return [];
+	}
+	return indexingPolicy.compositeIndexes.map(item => {
+		return {
+			name: 'Composite index',
+			automatic: indexingPolicy.automatic,
+			mode: indexingPolicy.indexingMode,
+			kind: 'Composite',
+			compositeFields: item.map(({ order, path }) => ({ compositeFieldPath: path, compositeFieldOrder: order }))
+		};
+	});
 }
 
 function getPartitionKey(collection) {
@@ -457,6 +532,62 @@ function getUniqueKeys(collection) {
 	}).filter(Boolean);
 }
 
+function getOfferProps(offer) {
+	const isAutopilotOn = _.get(offer, 'content.offerAutopilotSettings');
+	if (isAutopilotOn) {
+		return {
+			autopilot: true,
+			throughput: offer.content.offerAutopilotSettings.maximumTierThroughput
+		};
+	}
+	return {
+		autopilot: false,
+		throughput: offer ? offer.content.offerThroughput : ''
+	};
+}
+
+async function getStoredProcedures(containerInstance) {
+	const { resources } = await containerInstance.scripts.storedProcedures.readAll().fetchAll();
+	return resources.map((item, i) => {
+		return {
+			storedProcID: item.id,
+			name: `New Stored procedure(${i+1})`,
+			storedProcFunction: item.body
+		};
+	});
+}
+
+async function getTriggers(containerInstance) {
+	const { resources } = await containerInstance.scripts.triggers.readAll().fetchAll();
+	return resources.map((item, i) => {
+		return {
+			triggerID: item.id,
+			name: `New Trigger(${i+1})`,
+			prePostTrigger: item.triggerType === 'Pre' ? 'Pre-Trigger' : 'Post-Trigger',
+			triggerOperation: item.triggerOperation,
+			triggerFunction: item.body
+		};
+	});
+}
+
+async function getUdfs(containerInstance) {
+	const { resources } = await containerInstance.scripts.userDefinedFunctions.readAll().fetchAll();
+	return resources.map((item, i) => {
+		return {
+			udfID: item.id,
+			name: `New UDFS(${i+1})`,
+			udfFunction: item.body
+		};
+	});
+}
+
+function getTTL(defaultTTL) {
+	if (!defaultTTL) {
+		return 'Off';
+	}
+	return defaultTTL === -1 ? 'On (no default)' : 'On';
+}
+
 function getSamplingInfo(recordSamplingSettings, fieldInference) {
 	let samplingInfo = {};
 	let value = recordSamplingSettings[recordSamplingSettings.active].value;
@@ -466,8 +597,14 @@ function getSamplingInfo(recordSamplingSettings, fieldInference) {
 	return samplingInfo;
 }
 
-function getEndpoint(data){
-	return data.host + ':' + data.port;
+function getEndpoint(data) {
+	const hostWithPort = /:\d+/;
+	if (hostWithPort.test(data.host)) {
+		return data.host;
+	}
+	if (data.port) {
+		return data.host + ':' + data.port;
+	}
 }
 
 function setUpDocumentClient(connectionInfo) {
@@ -477,6 +614,70 @@ function setUpDocumentClient(connectionInfo) {
 		process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
 	}
 	return new CosmosClient({ endpoint, key });
+}
+
+async function getAdditionalAccountInfo(connectionInfo, logger) {
+	if (connectionInfo.disableSSL || !connectionInfo.includeAccountInformation) {
+		return {};
+	}
+
+	logger.log('info', {}, 'Account additional info', connectionInfo.hiddenKeys);
+
+	try {
+		const { clientId, appSecret, tenantId, subscriptionId, resourceGroupName, host } = connectionInfo;
+		const accNameRegex = /https:\/\/(.+)\.documents.+/i;
+		const accountName = accNameRegex.test(host) ? accNameRegex.exec(host)[1] : '';
+		const tokenBaseURl = `https://login.microsoftonline.com/${tenantId}/oauth2/token`;
+		const { data: tokenData } = await axios({
+			method: 'post',
+			url: tokenBaseURl,
+			data: qs.stringify({
+				grant_type: 'client_credentials',
+				client_id: clientId,
+				client_secret: appSecret,
+				resource: 'https://management.azure.com/'
+			}),
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
+			}
+		});
+		const dbAccountBaseUrl = `https://management.azure.com/subscriptions/${subscriptionId}/resourceGroups/${resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/${accountName}?api-version=2015-04-08`;
+		const { data: accountData } = await axios({
+			method: 'get',
+			url: dbAccountBaseUrl,
+			headers: {
+				'Authorization': `${tokenData.token_type} ${tokenData.access_token}`
+			}
+		});
+		logger.progress({
+			message: 'Getting account information',
+			containerName: connectionInfo.database
+		});
+		return {
+			enableMultipleWriteLocations: accountData.properties.enableMultipleWriteLocations,
+			enableAutomaticFailover: accountData.properties.enableAutomaticFailover,
+			isVirtualNetworkFilterEnabled: accountData.properties.isVirtualNetworkFilterEnabled,
+			virtualNetworkRules: accountData.properties.virtualNetworkRules.map(({ id, ignoreMissingVNetServiceEndpoint }) => ({
+				virtualNetworkId: id,
+				ignoreMissingVNetServiceEndpoint
+			})),
+			ipRangeFilter: accountData.properties.ipRangeFilter,
+			tags: Object.entries(accountData.tags).map(([tagName, tagValue]) => ({ tagName, tagValue })),
+			locations: accountData.properties.locations.map(({ id, locationName, failoverPriority, isZoneRedundant }) => ({
+				locationId: id,
+				locationName,
+				failoverPriority,
+				isZoneRedundant
+			}))
+		};
+	} catch(err) {
+		logger.log('error', { message: _.get(err, 'response.data.error.message', err.message), stack: err.stack });
+		logger.progress({
+			message: 'Error while getting account information',
+			containerName: connectionInfo.database
+		});
+		return {};
+	}
 }
 
 function mapError(error) {

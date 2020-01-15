@@ -157,6 +157,13 @@ making sure that you maintain a proper JSON format.
 		}],
 		"structure": [
 			{
+				"propertyName": "Database ID",
+				"propertyKeyword": "dbId",
+				"shouldValidate": false,
+				"propertyTooltip": "A database is a logical container of one or more containers",
+				"propertyType": "text"
+			},
+			{
 				"propertyName": "Description",
 				"propertyKeyword": "description",
 				"propertyTooltip": "description",
@@ -174,21 +181,32 @@ making sure that you maintain a proper JSON format.
 				]
 			},
 			{
+				"propertyName": "Autopilot mode",
+				"propertyKeyword": "autopilot",
+				"propertyType": "checkbox",
+				"template": "boolean"
+			},
+			{
+				"propertyName": "Maximum throughput (RU/s)",
+				"propertyKeyword": "throughput",
+				"propertyTooltip": "Each container can be provisioned throughput in Request Units (RU) per second. 1 RU corresponds to the throughput of a read of a 1 KB document.",
+				"propertyType": "numeric",
+				"valueType": "number",
+				"dependency": {
+					"key": "autopilot",
+					"value": true
+				}
+			},
+			{
 				"propertyName": "Throughput (RU/s)",
 				"propertyKeyword": "throughput",
 				"propertyTooltip": "Each container can be provisioned throughput in Request Units (RU) per second. 1 RU corresponds to the throughput of a read of a 1 KB document.",
 				"propertyType": "numeric",
-				"valueType": "number"
-			},
-			{
-				"propertyName": "RU per minute",
-				"propertyKeyword": "rump",
-				"propertyTooltip": "For each 100 RU per second provisioned, 1000 RU per minute can be provisioned.",
-				"propertyType": "select",
-				"options": [
-					"OFF",
-					"On"
-				]
+				"valueType": "number",
+				"dependency": {
+					"key": "autopilot",
+					"value": false
+				}
 			},
 			{
 				"propertyName": "Time to live",
@@ -197,7 +215,7 @@ making sure that you maintain a proper JSON format.
 				"propertyType": "select",
 				"options": [
 					"Off",
-					"On (no default",
+					"On (no default)",
 					"On"
 				]
 			},
@@ -212,8 +230,13 @@ making sure that you maintain a proper JSON format.
 				"propertyName": "Partition key",
 				"propertyKeyword": "partitionKey",
 				"propertyTooltip": "The Partition Key is a string only used to automatically partition data among multiple servers for scalability.  Choose a JSON property name that has a wide range of values and is likely to have evenly distributed access patterns.",
-				"propertyType": "text",
-				"valueType": "string"
+				"propertyType": "details",
+				"fieldParentCategory": "collection",
+				"template": "pickNameFromBucketFields",
+				"templateOptions": {
+					"nameFieldPath": true,
+					"pathDelimiter": "/"
+				}
 			},
 			{
 				"propertyName": "Unique keys",
@@ -223,9 +246,16 @@ making sure that you maintain a proper JSON format.
 					"propertyName": "Attribute path",
 					"propertyKeyword": "attributePath",
 					"propertyTooltip": "Comma separated paths",
-					"propertyType": "text"
+					"propertyType": "details",
+					"fieldParentCategory": "collection",
+					"template": "pickNameFromBucketFields",
+					"templateOptions": {
+						"multiple": true,
+						"nameFieldPath": true,
+						"pathDelimiter": "/"
+					}
 				}]
-			}, 
+			},
 			{
 				"propertyName": "Comments",
 				"propertyKeyword": "comments",
@@ -284,15 +314,6 @@ making sure that you maintain a proper JSON format.
 					]
 				},
 				{
-					"propertyName": "Included path",
-					"propertyKeyword": "indexIncludedPath",
-					"shouldValidate": false,
-					"propertyTooltip": "Included path index expression",
-					"propertyType": "details",
-					"template": "textarea",
-					"markdown": false
-				},
-				{
 					"propertyName": "Kind",
 					"propertyKeyword": "kind",
 					"shouldValidate": false,
@@ -301,8 +322,27 @@ making sure that you maintain a proper JSON format.
 					"options": [
 						"Hash",
 						"Range",
-						"Spatial"
+						"Spatial",
+						"Composite"
 					]
+				},
+				{
+					"propertyName": "Included path",
+					"propertyKeyword": "indexIncludedPath",
+					"shouldValidate": false,
+					"propertyTooltip": "Included path index expression",
+					"propertyType": "details",
+					"template": "textarea",
+					"markdown": false,
+					"dependency": {
+						"type": "not",
+						"values": [
+							{
+								"key": "kind",
+								"value": "Composite"
+							}
+						]
+					}
 				},
 				{
 					"propertyName": "Data type",
@@ -312,11 +352,69 @@ making sure that you maintain a proper JSON format.
 					"propertyType": "select",
 					"options": [
 						"String",
-						"Number",
-						"Point",
-						"Polygon",
-						"LineString"
-					]
+						"Number"
+					],
+					"dependency": {
+						"type": "or",
+						"values": [
+							{
+								"key": "kind",
+								"value": "Hash"
+							},
+							{
+								"key": "kind",
+								"value": "Range"
+							}
+						]
+					}
+				},
+				{
+					"propertyName": "Data types",
+					"propertyKeyword": "dataTypes",
+					"shouldValidate": false,
+					"propertyTooltip": "Data type: String, Number, Point, Polygon, or LineString",
+					"propertyType": "group",
+					"structure": [{
+						"propertyName": "Type",
+						"propertyKeyword": "spatialType",
+						"propertyType": "select",
+						"options": [
+							"Point",
+							"Polygon",
+							"MultiPolygon",
+							"LineString"
+						]
+					}],
+					"dependency": {
+						"key": "kind",
+						"value": "Spatial"
+					}
+				},
+				{
+					"propertyName": "Composite fields",
+					"propertyKeyword": "compositeFields",
+					"propertyType": "group",
+					"structure": [{
+						"propertyName": "Path",
+						"propertyKeyword": "compositeFieldPath",
+						"propertyType": "text"
+					},{
+						"propertyName": "Order",
+						"propertyKeyword": "compositeFieldOrder",
+						"propertyType": "select",
+						"options": [
+							"ascending",
+							"descending"
+						]
+					}],
+					"attributeList": [
+						"ascending",
+						"descending"
+					],
+					"dependency": {
+						"key": "kind",
+						"value": "Composite"
+					}
 				},
 				{
 					"propertyName": "Precision",
@@ -324,7 +422,20 @@ making sure that you maintain a proper JSON format.
 					"shouldValidate": false,
 					"propertyTooltip": "1-8 or -1 (Maximum precision) for numbers, 1-100 (Maximum precision) for string",
 					"propertyType": "text",
-					"valueType": "number"
+					"valueType": "number",
+					"dependency": {
+						"type": "or",
+						"values": [
+							{
+								"key": "kind",
+								"value": "Hash"
+							},
+							{
+								"key": "kind",
+								"value": "Range"
+							}
+						]
+					}
 				},
 				{
 					"propertyName": "Excluded path",
@@ -333,7 +444,20 @@ making sure that you maintain a proper JSON format.
 					"propertyTooltip": "Excluded path index expression",
 					"propertyType": "details",
 					"template": "textarea",
-					"markdown": false
+					"markdown": false,
+					"dependency": {
+						"type": "or",
+						"values": [
+							{
+								"key": "kind",
+								"value": "Hash"
+							},
+							{
+								"key": "kind",
+								"value": "Range"
+							}
+						]
+					}
 				},
 				{
 					"propertyName": "Comments",
@@ -449,7 +573,8 @@ making sure that you maintain a proper JSON format.
 						"All",
 						"Create",
 						"Delete",
-						"Replace"
+						"Replace",
+						"Update"
 					]
 				},
 				{
