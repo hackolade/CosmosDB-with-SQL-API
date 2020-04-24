@@ -171,17 +171,7 @@ making sure that you maintain a proper JSON format.
 				"template": "textarea"
 			},
 			{
-				"propertyName": "Storage Capacity",
-				"propertyKeyword": "storageCapacity",
-				"propertyTooltip": "A database is a logical container of one or more containers",
-				"propertyType": "select",
-				"options": [
-					"Fixed (10GB)",
-					"Unlimited"
-				]
-			},
-			{
-				"propertyName": "Autopilot mode",
+				"propertyName": "Autoscale",
 				"propertyKeyword": "autopilot",
 				"propertyType": "checkbox",
 				"template": "boolean"
