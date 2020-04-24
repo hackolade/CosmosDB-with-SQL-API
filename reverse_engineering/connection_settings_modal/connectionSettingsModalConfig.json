@@ -21,15 +21,20 @@
 				"inputLabel": "Name",
 				"inputKeyword": "name",
 				"inputType": "text",
-				"inputTooltip": "Choose a friendly connection name"
-				
+				"inputTooltip": "Choose a friendly connection name",
+				"validation": {
+					"regex": "([^\\s])" //not empty
+				}
 			},
 			{
 				"inputLabel": "Address",
 				"inputKeyword": "host",
 				"inputType": "text",
 				"inputTooltip": "Specify host IP address or DNS name of the Cosmos DB instance",
-				"inputPlaceholder": "https://<databaseaccount>.documents.azure.com or https://localhost"
+				"inputPlaceholder": "https://<databaseaccount>.documents.azure.com or https://localhost",
+				"validation": {
+					"regex": "([^\\s])" //not empty
+				}
 			},
 			{
 				"inputLabel": "Port",
