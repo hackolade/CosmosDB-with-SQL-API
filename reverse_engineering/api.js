@@ -603,7 +603,7 @@ function getEndpoint(data) {
 		return data.host;
 	}
 	if (data.port) {
-		return data.host + ':' + data.port;
+		return data.host + ':' + (data.port || '443');
 	}
 }
 
