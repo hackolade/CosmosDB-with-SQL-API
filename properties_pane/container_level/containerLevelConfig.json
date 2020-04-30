@@ -157,6 +157,37 @@ making sure that you maintain a proper JSON format.
 		}],
 		"structure": [
 			{
+				"propertyName": "Partition key",
+				"propertyKeyword": "partitionKey",
+				"propertyTooltip": "The Partition Key is a string only used to automatically partition data among multiple servers for scalability.  Choose a JSON property name that has a wide range of values and is likely to have evenly distributed access patterns.",
+				"propertyType": "details",
+				"fieldParentCategory": "collection",
+				"template": "pickNameFromBucketFields",
+				"templateOptions": {
+					"nameFieldPath": true,
+					"pathDelimiter": "/",
+					"setFieldPropertyByPath": "partitionKey"
+				}
+			},
+			{
+				"propertyName": "Unique keys",
+				"propertyKeyword": "uniqueKey",
+				"propertyType": "group",
+				"structure": [{
+					"propertyName": "Attribute path",
+					"propertyKeyword": "attributePath",
+					"propertyTooltip": "Comma separated paths",
+					"propertyType": "details",
+					"fieldParentCategory": "collection",
+					"template": "pickNameFromBucketFields",
+					"templateOptions": {
+						"multiple": true,
+						"nameFieldPath": true,
+						"pathDelimiter": "/"
+					}
+				}]
+			},
+			{
 				"propertyName": "Database ID",
 				"propertyKeyword": "dbId",
 				"shouldValidate": false,
@@ -215,37 +246,6 @@ making sure that you maintain a proper JSON format.
 				"propertyTooltip": "TTL in seconds if TTL is ON",
 				"propertyType": "numeric",
 				"valueType": "number"
-			},
-			{
-				"propertyName": "Partition key",
-				"propertyKeyword": "partitionKey",
-				"propertyTooltip": "The Partition Key is a string only used to automatically partition data among multiple servers for scalability.  Choose a JSON property name that has a wide range of values and is likely to have evenly distributed access patterns.",
-				"propertyType": "details",
-				"fieldParentCategory": "collection",
-				"template": "pickNameFromBucketFields",
-				"templateOptions": {
-					"nameFieldPath": true,
-					"pathDelimiter": "/",
-					"setFieldPropertyByPath": "partitionKey"
-				}
-			},
-			{
-				"propertyName": "Unique keys",
-				"propertyKeyword": "uniqueKey",
-				"propertyType": "group",
-				"structure": [{
-					"propertyName": "Attribute path",
-					"propertyKeyword": "attributePath",
-					"propertyTooltip": "Comma separated paths",
-					"propertyType": "details",
-					"fieldParentCategory": "collection",
-					"template": "pickNameFromBucketFields",
-					"templateOptions": {
-						"multiple": true,
-						"nameFieldPath": true,
-						"pathDelimiter": "/"
-					}
-				}]
 			},
 			{
 				"propertyName": "Comments",
