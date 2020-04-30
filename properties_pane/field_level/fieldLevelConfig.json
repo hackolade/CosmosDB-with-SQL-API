@@ -143,6 +143,14 @@ making sure that you maintain a proper JSON format.
 			"required",
 			"dependencies",
 			"primaryKey",
+			{
+				"propertyName": "Partition key",
+				"propertyKeyword": "partitionKey",
+				"shouldValidate": false,
+				"propertyTooltip": "Flag to indicate whether or not this region is an AvailabilityZone region",
+				"propertyType": "checkbox",
+				"abbr": "PK"
+			},
 			"foreignCollection",
 			"foreignField",
 			"relationshipType",
@@ -182,6 +190,14 @@ making sure that you maintain a proper JSON format.
 			"required",
 			"dependencies",
 			"primaryKey",
+			{
+				"propertyName": "Partition key",
+				"propertyKeyword": "partitionKey",
+				"shouldValidate": false,
+				"propertyTooltip": "Flag to indicate whether or not this region is an AvailabilityZone region",
+				"propertyType": "checkbox",
+				"abbr": "PK"
+			},
 			"foreignCollection",
 			"foreignField",
 			"relationshipType",
@@ -196,6 +212,14 @@ making sure that you maintain a proper JSON format.
 			"type",
 			"default",
 			"required",
+			{
+				"propertyName": "Partition key",
+				"propertyKeyword": "partitionKey",
+				"shouldValidate": false,
+				"propertyTooltip": "Flag to indicate whether or not this region is an AvailabilityZone region",
+				"propertyType": "checkbox",
+				"abbr": "PK"
+			},
 			"dependencies",
 			"sample",
 			"comments"
@@ -207,6 +231,14 @@ making sure that you maintain a proper JSON format.
 			"description",
 			"type",
 			"required",
+			{
+				"propertyName": "Partition key",
+				"propertyKeyword": "partitionKey",
+				"shouldValidate": false,
+				"propertyTooltip": "Flag to indicate whether or not this region is an AvailabilityZone region",
+				"propertyType": "checkbox",
+				"abbr": "PK"
+			},
 			"dependencies",
 			"sample",
 			"comments"
@@ -220,6 +252,14 @@ making sure that you maintain a proper JSON format.
 			"minProperties",
 			"maxProperties",
 			"required",
+			{
+				"propertyName": "Partition key",
+				"propertyKeyword": "partitionKey",
+				"shouldValidate": false,
+				"propertyTooltip": "Flag to indicate whether or not this region is an AvailabilityZone region",
+				"propertyType": "checkbox",
+				"abbr": "PK"
+			},
 			"dependencies",
 			"additionalProperties",
 			"comments"
@@ -234,6 +274,14 @@ making sure that you maintain a proper JSON format.
 			"maxItems",
 			"uniqueItems",
 			"required",
+			{
+				"propertyName": "Partition key",
+				"propertyKeyword": "partitionKey",
+				"shouldValidate": false,
+				"propertyTooltip": "Flag to indicate whether or not this region is an AvailabilityZone region",
+				"propertyType": "checkbox",
+				"abbr": "PK"
+			},
 			"dependencies",
 			"additionalItems",
 			"comments"
