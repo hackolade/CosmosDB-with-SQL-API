@@ -21,7 +21,8 @@
 	"collection": {
 		"collectionName": "New item type",
 		"collectionUsers": [],
-		"collation": {}
+		"collation": {},
+		"snippet": "collection"
 	},
 	"field": {
 		"name": "New field"

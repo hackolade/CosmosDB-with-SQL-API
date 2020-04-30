@@ -1,0 +1,10 @@
+{
+	"name": "collection",
+	"properties": [{
+		"name": "partitionKey",
+		"type": "string",
+		"required": true,
+		"hasERDDivider": true,
+		"primaryKey": true
+	}]
+}
