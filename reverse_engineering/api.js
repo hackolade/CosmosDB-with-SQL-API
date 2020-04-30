@@ -131,11 +131,12 @@ module.exports = {
 				const collection = await getCollectionById(containerInstance);
 				const offerInfo = await getOfferType(collection);
 				const { autopilot, throughput } = getOfferProps(offerInfo);
+				const partitionKey = getPartitionKey(collection);
 				const bucketInfo = {
 					dbId: data.database,
 					throughput,
 					autopilot,
-					partitionKey: getPartitionKey(collection),
+					partitionKey,
 					uniqueKey: getUniqueKeys(collection),
 					storedProcs,
 					triggers,
@@ -168,7 +169,7 @@ module.exports = {
 							indexes: [],
 							bucketIndexes: indexes,
 							views: [],
-							validation: false,
+							validation: createSchemaByPartitionKeyPath(partitionKey, filteredDocuments),
 							bucketInfo
 						};
 						collectionPackages.push(documentsPackage);
@@ -185,7 +186,7 @@ module.exports = {
 								indexes: [],
 								bucketIndexes: indexes,
 								views: [],
-								validation: false,
+								validation: createSchemaByPartitionKeyPath(partitionKey, filteredDocuments),
 								docType: documentKindName,
 								bucketInfo
 							};
@@ -205,7 +206,7 @@ module.exports = {
 						indexes: [],
 						bucketIndexes: indexes,
 						views: [],
-						validation: false,
+						validation: createSchemaByPartitionKeyPath(partitionKey, filteredDocuments),
 						docType: bucketName,
 						bucketInfo
 					};
@@ -651,7 +652,8 @@ async function getAdditionalAccountInfo(connectionInfo, logger) {
 		});
 		logger.progress({
 			message: 'Getting account information',
-			containerName: connectionInfo.database
+			containerName: connectionInfo.database,
+			entityName: ''
 		});
 		return {
 			enableMultipleWriteLocations: accountData.properties.enableMultipleWriteLocations,
@@ -684,5 +686,51 @@ function mapError(error) {
 	return {
 		message: error.message,
 		stack: error.stack
+	};
+}
+
+function createSchemaByPartitionKeyPath(path, documents = []) {
+	const checkIfDocumentContaintPath = (path, document = {}) => {
+		if (_.isEmpty(path)) {
+			return true;
+		}
+		const value = _.get(document, `${path[0]}`);
+		if (value) {
+			return checkIfDocumentContaintPath(_.tail(path), value);
+		}
+		return false;
+	}
+
+	const getNestedObject = (path) => {
+		if (path.length === 1) {
+			return {
+				[path[0]]: {
+					primaryKey: true,
+					partitionKey: true,
+				}
+			}
+		}
+		return {
+			[path[0]]: {
+				properties: getNestedObject(_.tail(path))
+			}
+		};
+	}
+
+	if (!path || typeof path !== 'string') {
+		return false;
+	}
+	const namePath = _.tail(path.split('/'));
+	if (namePath.length === 0) {
+		return false;
+	}
+	if (!documents.some(doc => checkIfDocumentContaintPath(namePath, doc))) {
+		return false;
+	} 
+
+	return {
+		jsonSchema: {
+			properties: getNestedObject(namePath)
+		}
 	};
 }
