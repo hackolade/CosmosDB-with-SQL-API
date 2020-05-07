@@ -4,7 +4,7 @@
 		"name": "partitionKey",
 		"type": "string",
 		"required": true,
-		"hasERDDivider": true,
-		"primaryKey": true
+		"primaryKey": true,
+		"partitionKey": true
 	}]
 }
