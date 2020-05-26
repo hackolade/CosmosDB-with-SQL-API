@@ -12,7 +12,12 @@
 		"modelName": "New model",
 		"dbVersion": "",
 		"dbVendor": "CosmosDB",
-		"apiExperience": "SQL API"
+		"apiExperience": "SQL API",
+		"transactionalDataStored": 10,
+		"analyticalDataStored": 10,
+		"itemSize": 1,
+		"readsPerSecPerRegion": 100,
+		"writesPerSecPerRegion": 100
 	},
 	"container": {
 		"name": "New container",

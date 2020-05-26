@@ -132,7 +132,6 @@ making sure that you maintain a proper JSON format.
 			{
 				"propertyName": "DB vendor",
 				"propertyKeyword": "dbVendor",
-				"shouldValidate": false,
 				"propertyTooltip": "db vendor",
 				"propertyType": "select",
 				"options": [
@@ -143,7 +142,6 @@ making sure that you maintain a proper JSON format.
 			{
 				"propertyName": "API Experience",
 				"propertyKeyword": "apiExperience",
-				"shouldValidate": false,
 				"propertyTooltip": "Default experience",
 				"propertyType": "select",
 				"options": [
@@ -158,35 +156,30 @@ making sure that you maintain a proper JSON format.
 			{
 				"propertyName": "Tenant",
 				"propertyKeyword": "tenant",
-				"shouldValidate": false,
 				"propertyTooltip": "Azure tenant",
 				"propertyType": "text"
 			},
 			{
 				"propertyName": "Account ID",
 				"propertyKeyword": "accountID",
-				"shouldValidate": false,
 				"propertyTooltip": "Azure CosmosDB account ID",
 				"propertyType": "text"
 			},
 			{
 				"propertyName": "Resource group",
 				"propertyKeyword": "resGrp",
-				"shouldValidate": false,
 				"propertyTooltip": "Resource Group",
 				"propertyType": "text"
 			},
 			{
 				"propertyName": "Subscription",
 				"propertyKeyword": "subscription",
-				"shouldValidate": false,
 				"propertyTooltip": "Subscription",
 				"propertyType": "text"
 			},
 			{
 				"propertyName": "Preferred location",
 				"propertyKeyword": "preferredLocation",
-				"shouldValidate": false,
 				"propertyTooltip": "Default experience",
 				"propertyType": "select",
 				"options": [
@@ -249,34 +242,29 @@ making sure that you maintain a proper JSON format.
 					"US Gov Virginia",
 					"US Sec West",
 					"US Sec East"
-				],
-				"disabledOption": false
+				]
 			},
 			{
 				"propertyName": "Locations",
 				"propertyKeyword": "locations",
-				"shouldValidate": false,
 				"propertyTooltip": "List of locations enabled for the Cosmos DB account",
 				"propertyType": "group",
 				"structure": [
 					{
 						"propertyName": "Id",
 						"propertyKeyword": "locationId",
-						"shouldValidate": false,
 						"propertyTooltip": "The unique identifier of the region within the database account",
 						"propertyType": "text"
 					},
 					{
 						"propertyName": "Name",
 						"propertyKeyword": "locationName",
-						"shouldValidate": false,
 						"propertyTooltip": "The name of the region",
 						"propertyType": "text"
 					},
 					{
 						"propertyName": "Failover priority",
 						"propertyKeyword": "failoverPriority",
-						"shouldValidate": false,
 						"propertyTooltip": "The failover priority of the region",
 						"propertyType": "numeric",
 						"valueType": "number"
@@ -284,7 +272,6 @@ making sure that you maintain a proper JSON format.
 					{
 						"propertyName": "Zone redundant",
 						"propertyKeyword": "isZoneRedundant",
-						"shouldValidate": false,
 						"propertyTooltip": "Flag to indicate whether or not this region is an AvailabilityZone region",
 						"propertyType": "checkbox"
 					}
@@ -293,15 +280,68 @@ making sure that you maintain a proper JSON format.
 			{
 				"propertyName": "Enable multiple write locations",
 				"propertyKeyword": "enableMultipleWriteLocations",
-				"shouldValidate": false,
 				"propertyTooltip": "Enables the account to write in multiple locations",
-				"propertyType": "checkbox",
-				"disabledOption": false
+				"propertyType": "checkbox"
+			},
+			{
+				"propertyName": "Total transactional data stored",
+				"propertyKeyword": "transactionalDataStored",
+				"propertyTooltip": "In GB, storage needed for transactional workload",
+				"propertyValidate": true,
+				"propertyType": "numeric",
+				"valueType": "number",
+				"allowNegative": false
+			},
+			{
+				"propertyName": "Use Analytical Store",
+				"propertyKeyword": "useAnalyticalStore",
+				"propertyTooltip": "Enable analytical store capability",
+				"propertyType": "checkbox"
+			},
+			{
+				"propertyName": "Total analytical data stored",
+				"propertyKeyword": "analyticalDataStored",
+				"propertyTooltip": "In GB, storage needed for analytical workload",
+				"propertyValidate": true,
+				"propertyType": "numeric",
+				"valueType": "number",
+				"allowNegative": false,
+				"dependency": {
+					"key": "useAnalyticalStore",
+					"value": true
+				}
+			},
+			{
+				"propertyName": "Avg item size",
+				"propertyKeyword": "itemSize",
+				"propertyTooltip": "In KB, expected size of documents, max 2048 KB",
+				"propertyValidate": true,
+				"propertyType": "numeric",
+				"valueType": "number",
+				"allowNegative": false,
+				"maxValue": 2048
+			},
+			{
+				"propertyName": "Reads/sec per region",
+				"propertyKeyword": "readsPerSecPerRegion",
+				"propertyTooltip": "Number of reads expected per second",
+				"propertyValidate": true,
+				"propertyType": "numeric",
+				"valueType": "number",
+				"allowNegative": false
+			},
+			{
+				"propertyName": "Writes/sec per region",
+				"propertyKeyword": "writesPerSecPerRegion",
+				"propertyTooltip": "Number of writes expected per second",
+				"propertyValidate": true,
+				"propertyType": "numeric",
+				"valueType": "number",
+				"allowNegative": false
 			},
 			{
 				"propertyName": "Default consistency policy",
 				"propertyKeyword": "defaultConsistency",
-				"shouldValidate": false,
 				"propertyTooltip": "Default consistency policy level",
 				"propertyType": "select",
 				"options": [
@@ -310,43 +350,35 @@ making sure that you maintain a proper JSON format.
 					"Bounded staleness",
 					"Consistent prefix",
 					"Eventual"
-				],
-				"disabledOption": false
+				]
 			},
 			{
 				"propertyName": "Enable automatic failover",
 				"propertyKeyword": "enableAutomaticFailover",
-				"shouldValidate": false,
 				"propertyTooltip": "Enables automatic failover of the write region in the rare event that the region is unavailable due to an outage",
-				"propertyType": "checkbox",
-				"disabledOption": false
+				"propertyType": "checkbox"
 			},
 			{
 				"propertyName": "Virtual network filter enabled",
 				"propertyKeyword": "isVirtualNetworkFilterEnabled",
-				"shouldValidate": false,
 				"propertyTooltip": "Flag to indicate whether to enable/disable Virtual Network ACL rules",
-				"propertyType": "checkbox",
-				"disabledOption": false
+				"propertyType": "checkbox"
 			},
 			{
 				"propertyName": "Virtual network rules",
 				"propertyKeyword": "virtualNetworkRules",
-				"shouldValidate": false,
 				"propertyTooltip": "List of Virtual Network ACL rules configured for the Cosmos DB account",
 				"propertyType": "group",
 				"structure": [
 					{
 						"propertyName": "Id",
 						"propertyKeyword": "virtualNetworkId",
-						"shouldValidate": false,
 						"propertyTooltip": "Resource ID of a subnet",
 						"propertyType": "text"
 					},
 					{
 						"propertyName": "Ignore missing VNet endpoint",
 						"propertyKeyword": "ignoreMissingVNetServiceEndpoint",
-						"shouldValidate": false,
 						"propertyTooltip": "Create firewall rule before the virtual network has vnet service endpoint enabled",
 						"propertyType": "checkbox"
 					}
@@ -355,7 +387,6 @@ making sure that you maintain a proper JSON format.
 			{
 				"propertyName": "IP-Range filter",
 				"propertyKeyword": "ipRangeFilter",
-				"shouldValidate": false,
 				"propertyTooltip": "This value specifies the set of IP addresses or IP address ranges in CIDR form to be included as the allowed list of client IPs for a given database account",
 				"propertyType": "details",
 				"template": "textarea",
@@ -364,21 +395,18 @@ making sure that you maintain a proper JSON format.
 			{
 				"propertyName": "Tags",
 				"propertyKeyword": "tags",
-				"shouldValidate": false,
 				"propertyTooltip": "A list of key-value pairs that describe the resource",
 				"propertyType": "group",
 				"structure": [
 					{
 						"propertyName": "Name",
 						"propertyKeyword": "tagName",
-						"shouldValidate": false,
 						"propertyTooltip": "Tag name",
 						"propertyType": "text"
 					},
 					{
 						"propertyName": "Value",
 						"propertyKeyword": "tagValue",
-						"shouldValidate": false,
 						"propertyTooltip": "Tag value",
 						"propertyType": "text"
 					}
@@ -387,7 +415,6 @@ making sure that you maintain a proper JSON format.
 			{
 				"propertyName": "Comments",
 				"propertyKeyword": "comments",
-				"shouldValidate": false,
 				"propertyTooltip": "comments",
 				"propertyType": "details",
 				"template": "textarea"
