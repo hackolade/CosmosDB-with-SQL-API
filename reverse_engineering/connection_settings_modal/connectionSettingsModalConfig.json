@@ -46,7 +46,7 @@
 			{
 				"inputLabel": "Account Key",
 				"inputKeyword": "accountKey",
-				"inputType": "text",
+				"inputType": "password",
 				"inputTooltip": "Paste the account Primary or Secondary (Read-Only) Key, or C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw== if local instance",
 				"isHiddenKey": true,
 				"defaultValue": ""
@@ -105,7 +105,7 @@
 			{
 				"inputLabel": "Application secret",
 				"inputKeyword": "appSecret",
-				"inputType": "text",
+				"inputType": "password",
 				"inputTooltip": "Specify the Application secret string",
 				"isHiddenKey": true,
 				"dependency": {
