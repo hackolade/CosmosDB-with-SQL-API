@@ -315,6 +315,7 @@ making sure that you maintain a proper JSON format.
 					"propertyType": "fieldList",
 					"template": "orderedList",
 					"attributeList": [
+						"",
 						"?",
 						"*"
 					],
