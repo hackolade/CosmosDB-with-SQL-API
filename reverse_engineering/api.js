@@ -728,7 +728,7 @@ function createSchemaByPartitionKeyPath(path, documents = []) {
 			return true;
 		}
 		const value = _.get(document, `${path[0]}`);
-		if (value) {
+		if (value !== undefined) {
 			return checkIfDocumentContainsPath(_.tail(path), value);
 		}
 		return false;
@@ -758,7 +758,7 @@ function createSchemaByPartitionKeyPath(path, documents = []) {
 		return false;
 	}
 
-	const namePath = _.tail(path[0].split('.'));
+	const namePath = path[0].split('.');
 	if (namePath.length === 0) {
 		return false;
 	}
