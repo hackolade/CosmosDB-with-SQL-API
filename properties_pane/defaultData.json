@@ -21,6 +21,7 @@
 	},
 	"container": {
 		"name": "New container",
+		"partitionKey": [],
 		"indexes": []
 	},
 	"collection": {
