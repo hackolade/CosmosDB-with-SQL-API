@@ -132,6 +132,7 @@ module.exports = {
 				const offerInfo = await getOfferType(collection);
 				const { autopilot, throughput } = getOfferProps(offerInfo);
 				const partitionKey = getPartitionKey(collection);
+				const indexes = getIndexes(collection.indexingPolicy);
 				const bucketInfo = {
 					dbId: data.database,
 					throughput,
@@ -142,9 +143,9 @@ module.exports = {
 					triggers,
 					udfs,
 					TTL: getTTL(collection.defaultTtl),
-					TTLseconds: collection.defaultTtl
+					TTLseconds: collection.defaultTtl,
+					indexes,
 				};
-				const indexes = getIndexes(collection.indexingPolicy);
 
 				const documentsAmount = await getDocumentsAmount(containerInstance);
 				const size = getSampleDocSize(documentsAmount, recordSamplingSettings) || 1000;
@@ -167,7 +168,6 @@ module.exports = {
 							dbName: bucketName,
 							emptyBucket: true,
 							indexes: [],
-							bucketIndexes: indexes,
 							views: [],
 							validation: createSchemaByPartitionKeyPath(partitionKey, filteredDocuments),
 							bucketInfo
@@ -184,7 +184,6 @@ module.exports = {
 								collectionName: docKindItem,
 								documents: newArrayDocuments || [],
 								indexes: [],
-								bucketIndexes: indexes,
 								views: [],
 								validation: createSchemaByPartitionKeyPath(partitionKey, filteredDocuments),
 								docType: documentKindName,
@@ -204,7 +203,6 @@ module.exports = {
 						collectionName: bucketName,
 						documents: filteredDocuments || [],
 						indexes: [],
-						bucketIndexes: indexes,
 						views: [],
 						validation: createSchemaByPartitionKeyPath(partitionKey, filteredDocuments),
 						docType: bucketName,
@@ -435,9 +433,29 @@ function getIndexes(indexingPolicy){
 	return rangeIndexes.concat(spatialIndexes).concat(compositeIndexes);
 }
 
+const getIndexPathType = (path) => {
+	if (/\?$/.test(path)) {
+		return '?';
+	} else if (/\*$/.test(path)) {
+		return '*';
+	} else {
+		return '';
+	}
+};
+
+const getIndexPath = (path) => {
+	const type = getIndexPathType(path);
+	const name = path.replace(/\/(\?|\*)$/, '');
+
+	return {
+		name: getKeyPath(name),
+		type,
+	};
+};
+
 function getRangeIndexes(indexingPolicy) {
 	let rangeIndexes = [];
-	const excludedPaths = indexingPolicy.excludedPaths.map(({ path }) => path).join(', ');
+	const excludedPaths = indexingPolicy.excludedPaths.map(({ path }) => getIndexPath(path));
 	
 	if(indexingPolicy) {
 		indexingPolicy.includedPaths.forEach((item, i) => {
@@ -448,19 +466,19 @@ function getRangeIndexes(indexingPolicy) {
 						indexPrecision: index.precision,
 						automatic: indexingPolicy.automatic,
 						mode: indexingPolicy.indexingMode,
-						indexIncludedPath: item.path,
+						indexIncludedPath: [getIndexPath(item.path)],
 						indexExcludedPath: excludedPaths,
 						dataType: index.dataType,
 						kind: index.kind
 					};
 				});
-				rangeIndexes = rangeIndexes.concat(rangeIndexes, indexes);
+				rangeIndexes = rangeIndexes.concat(indexes);
 			} else {
 				const index = {
 					name: `New Index(${i+1})`,
 					automatic: indexingPolicy.automatic,
 					mode: indexingPolicy.indexingMode,
-					indexIncludedPath: item.path,
+					indexIncludedPath: [getIndexPath(item.path)],
 					indexExcludedPath: excludedPaths,
 					kind: 'Range'
 				}
@@ -481,7 +499,7 @@ function getSpatialIndexes(indexingPolicy) {
 			automatic: indexingPolicy.automatic,
 			mode: indexingPolicy.indexingMode,
 			kind: 'Spatial',
-			indexIncludedPath: item.path,
+			indexIncludedPath: [getIndexPath(item.path)],
 			dataTypes: item.types.map(type => ({ spatialType: type }))
 		};
 	});
@@ -502,6 +520,22 @@ function getCompositeIndexes(indexingPolicy) {
 	});
 }
 
+const trimKey = (key) => {
+	const trimRegexp = /^\"([\s\S]+)\"$/i;
+
+	if (!trimRegexp.test(key)) {
+		return key;
+	}
+
+	const result = key.match(trimRegexp);
+
+	return result[1] || key;
+};
+
+const getKeyPath = (keyPath) => {
+	return (keyPath || '').split('/').filter(Boolean).map(trimKey).map(item => item === '[]' ? 0 : item).join('.');
+};
+
 function getPartitionKey(collection) {
 	if (!collection.partitionKey) {
 		return '';
@@ -509,8 +543,7 @@ function getPartitionKey(collection) {
 	if (!Array.isArray(collection.partitionKey.paths)) {
 		return '';
 	}
-	
-	return collection.partitionKey.paths.join(',');
+	return collection.partitionKey.paths.map(getKeyPath);
 }
 
 function getUniqueKeys(collection) {
@@ -528,7 +561,7 @@ function getUniqueKeys(collection) {
 		}
 
 		return {
-			attributePath: item.paths.join(',')
+			attributePath: item.paths.map(getKeyPath)
 		};
 	}).filter(Boolean);
 }
@@ -690,13 +723,13 @@ function mapError(error) {
 }
 
 function createSchemaByPartitionKeyPath(path, documents = []) {
-	const checkIfDocumentContaintPath = (path, document = {}) => {
+	const checkIfDocumentContainsPath = (path, document = {}) => {
 		if (_.isEmpty(path)) {
 			return true;
 		}
 		const value = _.get(document, `${path[0]}`);
-		if (value) {
-			return checkIfDocumentContaintPath(_.tail(path), value);
+		if (value !== undefined) {
+			return checkIfDocumentContainsPath(_.tail(path), value);
 		}
 		return false;
 	}
@@ -717,14 +750,19 @@ function createSchemaByPartitionKeyPath(path, documents = []) {
 		};
 	}
 
-	if (!path || typeof path !== 'string') {
+	if (!Array.isArray(path)) {
 		return false;
 	}
-	const namePath = _.tail(path.split('/'));
+
+	if (!path[0] || typeof path[0] !== 'string') {
+		return false;
+	}
+
+	const namePath = path[0].split('.');
 	if (namePath.length === 0) {
 		return false;
 	}
-	if (!documents.some(doc => checkIfDocumentContaintPath(namePath, doc))) {
+	if (!documents.some(doc => checkIfDocumentContainsPath(namePath, doc))) {
 		return false;
 	} 
 

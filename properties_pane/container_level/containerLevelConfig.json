@@ -160,13 +160,9 @@ making sure that you maintain a proper JSON format.
 				"propertyName": "Partition key",
 				"propertyKeyword": "partitionKey",
 				"propertyTooltip": "The Partition Key is a string only used to automatically partition data among multiple servers for scalability.  Choose a JSON property name that has a wide range of values and is likely to have evenly distributed access patterns.",
-				"propertyType": "details",
-				"fieldParentCategory": "collection",
-				"template": "pickNameFromBucketFields",
+				"propertyType": "primaryKeySetter",
 				"templateOptions": {
-					"nameFieldPath": true,
-					"pathDelimiter": "/",
-					"setFieldPropertyByPath": "partitionKey"
+					"maxField": 1
 				}
 			},
 			{
@@ -176,15 +172,8 @@ making sure that you maintain a proper JSON format.
 				"structure": [{
 					"propertyName": "Attribute path",
 					"propertyKeyword": "attributePath",
-					"propertyTooltip": "Comma separated paths",
-					"propertyType": "details",
-					"fieldParentCategory": "collection",
-					"template": "pickNameFromBucketFields",
-					"templateOptions": {
-						"multiple": true,
-						"nameFieldPath": true,
-						"pathDelimiter": "/"
-					}
+					"propertyType": "fieldList",
+					"template": "orderedList"
 				}]
 			},
 			{
@@ -322,9 +311,13 @@ making sure that you maintain a proper JSON format.
 					"propertyKeyword": "indexIncludedPath",
 					"shouldValidate": false,
 					"propertyTooltip": "Included path index expression",
-					"propertyType": "details",
-					"template": "textarea",
-					"markdown": false,
+					"propertyType": "fieldList",
+					"template": "orderedList",
+					"attributeList": [
+						"",
+						"?",
+						"*"
+					],
 					"dependency": {
 						"type": "not",
 						"values": [
@@ -433,9 +426,13 @@ making sure that you maintain a proper JSON format.
 					"propertyKeyword": "indexExcludedPath",
 					"shouldValidate": false,
 					"propertyTooltip": "Excluded path index expression",
-					"propertyType": "details",
-					"template": "textarea",
-					"markdown": false,
+					"propertyType": "fieldList",
+					"template": "orderedList",
+					"attributeList": [
+						"",
+						"?",
+						"*"
+					],
 					"dependency": {
 						"type": "or",
 						"values": [
