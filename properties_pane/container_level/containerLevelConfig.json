@@ -313,6 +313,11 @@ making sure that you maintain a proper JSON format.
 					"propertyTooltip": "Included path index expression",
 					"propertyType": "fieldList",
 					"template": "orderedList",
+					"templateOptions": {
+						"allowCustomValue": true,
+						"divider": "/",
+						"front": true
+					},
 					"attributeList": [
 						"",
 						"?",
@@ -428,6 +433,11 @@ making sure that you maintain a proper JSON format.
 					"propertyTooltip": "Excluded path index expression",
 					"propertyType": "fieldList",
 					"template": "orderedList",
+					"templateOptions": {
+						"allowCustomValue": true,
+						"divider": "/",
+						"front": true
+					},
 					"attributeList": [
 						"",
 						"?",
