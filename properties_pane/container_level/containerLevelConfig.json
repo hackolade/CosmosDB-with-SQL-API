@@ -273,124 +273,9 @@ making sure that you maintain a proper JSON format.
 				]
 			},
 			{
-			"propertyName": "Included paths",
-			"propertyType": "group",
-			"propertyKeyword": "includedPaths",
-			"shouldValidate": false,
-			"propertyTooltip": "",
-			"structure": [
-				{
-					"propertyName": "Name",
-					"propertyKeyword": "name",
-					"shouldValidate": false,
-					"propertyTooltip": "",
-					"propertyType": "text"
-				},
-				{
-					"propertyName": "Description",
-					"propertyKeyword": "indexDescription",
-					"shouldValidate": false,
-					"propertyTooltip": "description",
-					"propertyType": "details",
-					"template": "textarea"
-				},
-				{
-					"propertyName": "Path",
-					"propertyKeyword": "indexIncludedPath",
-					"shouldValidate": false,
-					"propertyTooltip": "Included path index expression",
-					"propertyType": "fieldList",
-					"template": "orderedList",
-					"attributeList": [
-						"",
-						"?",
-						"*"
-					],
-					"templateOptions": {
-						"allowCustomValue": true,
-						"divider": "/",
-						"front": true
-					}
-				},
-				{
-				"propertyName": "Path properties",
+				"propertyName": "Included paths",
 				"propertyType": "group",
-				"propertyKeyword": "pathProps",
-				"shouldValidate": false,
-				"propertyTooltip": "",
-				"structure": [
-					{
-						"propertyName": "Kind",
-						"propertyKeyword": "kind",
-						"shouldValidate": false,
-						"propertyTooltip": "Index kind: Hash (equality queries), Range (equality, range or Order By queries), or Spatial (spatial queries)",
-						"propertyType": "select",
-						"options": [
-							"Hash",
-							"Range"
-						]
-					},
-					{
-						"propertyName": "Data type",
-						"propertyKeyword": "dataType",
-						"shouldValidate": false,
-						"propertyTooltip": "Data type: String, Number, Point, Polygon, or LineString (can contain only one entry per data type per path)",
-						"propertyType": "select",
-						"options": [
-							"String",
-							"Number"
-						],
-						"dependency": {
-							"type": "or",
-							"values": [
-								{
-									"key": "kind",
-									"value": "Hash"
-								},
-								{
-									"key": "kind",
-									"value": "Range"
-								}
-							]
-						}
-					},
-					{
-						"propertyName": "Precision",
-						"propertyKeyword": "indexPrecision",
-						"shouldValidate": false,
-						"propertyTooltip": "1-8 or -1 (Maximum precision) for numbers, 1-100 (Maximum precision) for string",
-						"propertyType": "text",
-						"valueType": "number",
-						"dependency": {
-							"type": "or",
-							"values": [
-								{
-									"key": "kind",
-									"value": "Hash"
-								},
-								{
-									"key": "kind",
-									"value": "Range"
-								}
-							]
-						}
-					}
-				]
-				},
-				{
-					"propertyName": "Comments",
-					"propertyKeyword": "indexComments",
-					"shouldValidate": false,
-					"propertyTooltip": "comments",
-					"propertyType": "details",
-					"template": "textarea"
-				}
-			]
-			},
-			{
-				"propertyName": "Excluded paths",
-				"propertyType": "group",
-				"propertyKeyword": "excludedPaths",
+				"propertyKeyword": "includedPaths",
 				"shouldValidate": false,
 				"propertyTooltip": "",
 				"structure": [
@@ -402,18 +287,10 @@ making sure that you maintain a proper JSON format.
 						"propertyType": "text"
 					},
 					{
-						"propertyName": "Description",
-						"propertyKeyword": "indexDescription",
-						"shouldValidate": false,
-						"propertyTooltip": "description",
-						"propertyType": "details",
-						"template": "textarea"
-					},
-					{
 						"propertyName": "Path",
-						"propertyKeyword": "indexExcludedPath",
+						"propertyKeyword": "indexIncludedPath",
 						"shouldValidate": false,
-						"propertyTooltip": "Excluded path index expression",
+						"propertyTooltip": "Included path index expression",
 						"propertyType": "fieldList",
 						"template": "orderedList",
 						"attributeList": [
@@ -428,9 +305,9 @@ making sure that you maintain a proper JSON format.
 						}
 					},
 					{
-						"propertyName": "Path properties",
+						"propertyName": "Indexes",
 						"propertyType": "group",
-						"propertyKeyword": "pathProps",
+						"propertyKeyword": "inclIndexes",
 						"shouldValidate": false,
 						"propertyTooltip": "",
 						"structure": [
@@ -454,20 +331,7 @@ making sure that you maintain a proper JSON format.
 								"options": [
 									"String",
 									"Number"
-								],
-								"dependency": {
-									"type": "or",
-									"values": [
-										{
-											"key": "kind",
-											"value": "Hash"
-										},
-										{
-											"key": "kind",
-											"value": "Range"
-										}
-									]
-								}
+								]
 							},
 							{
 								"propertyName": "Precision",
@@ -475,23 +339,175 @@ making sure that you maintain a proper JSON format.
 								"shouldValidate": false,
 								"propertyTooltip": "1-8 or -1 (Maximum precision) for numbers, 1-100 (Maximum precision) for string",
 								"propertyType": "text",
-								"valueType": "number",
-								"dependency": {
-									"type": "or",
-									"values": [
-										{
-											"key": "kind",
-											"value": "Hash"
-										},
-										{
-											"key": "kind",
-											"value": "Range"
-										}
-									]
-								}
+								"valueType": "number"
 							}
 						]
-						},
+					},
+					{
+						"propertyName": "Description",
+						"propertyKeyword": "indexDescription",
+						"shouldValidate": false,
+						"propertyTooltip": "description",
+						"propertyType": "details",
+						"template": "textarea"
+					},
+					{
+						"propertyName": "Comments",
+						"propertyKeyword": "indexComments",
+						"shouldValidate": false,
+						"propertyTooltip": "comments",
+						"propertyType": "details",
+						"template": "textarea"
+					}
+				]
+			},
+			{
+				"propertyName": "Excluded paths",
+				"propertyType": "group",
+				"propertyKeyword": "excludedPaths",
+				"shouldValidate": false,
+				"propertyTooltip": "",
+				"structure": [
+					{
+						"propertyName": "Name",
+						"propertyKeyword": "name",
+						"shouldValidate": false,
+						"propertyTooltip": "",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Path",
+						"propertyKeyword": "indexExcludedPath",
+						"shouldValidate": false,
+						"propertyTooltip": "Excluded path index expression",
+						"propertyType": "fieldList",
+						"template": "orderedList",
+						"attributeList": [
+							"",
+							"?",
+							"*"
+						],
+						"templateOptions": {
+							"allowCustomValue": true,
+							"divider": "/",
+							"front": true
+						}
+					},
+					{
+						"propertyName": "Indexes",
+						"propertyType": "group",
+						"propertyKeyword": "exclIndexes",
+						"shouldValidate": false,
+						"propertyTooltip": "",
+						"structure": [
+							{
+								"propertyName": "Kind",
+								"propertyKeyword": "kind",
+								"shouldValidate": false,
+								"propertyTooltip": "Index kind: Hash (equality queries), Range (equality, range or Order By queries), or Spatial (spatial queries)",
+								"propertyType": "select",
+								"options": [
+									"Hash",
+									"Range"
+								]
+							},
+							{
+								"propertyName": "Data type",
+								"propertyKeyword": "dataType",
+								"shouldValidate": false,
+								"propertyTooltip": "Data type: String, Number, Point, Polygon, or LineString (can contain only one entry per data type per path)",
+								"propertyType": "select",
+								"options": [
+									"String",
+									"Number"
+								]
+							},
+							{
+								"propertyName": "Precision",
+								"propertyKeyword": "indexPrecision",
+								"shouldValidate": false,
+								"propertyTooltip": "1-8 or -1 (Maximum precision) for numbers, 1-100 (Maximum precision) for string",
+								"propertyType": "text",
+								"valueType": "number"
+							}
+						]
+					},
+					{
+						"propertyName": "Description",
+						"propertyKeyword": "indexDescription",
+						"shouldValidate": false,
+						"propertyTooltip": "description",
+						"propertyType": "details",
+						"template": "textarea"
+					},
+					{
+						"propertyName": "Comments",
+						"propertyKeyword": "indexComments",
+						"shouldValidate": false,
+						"propertyTooltip": "comments",
+						"propertyType": "details",
+						"template": "textarea"
+					}
+				]
+			},
+			{
+				"propertyName": "Spatial indexes",
+				"propertyType": "group",
+				"propertyKeyword": "spatialIndexes",
+				"shouldValidate": false,
+				"propertyTooltip": "",
+				"structure": [
+					{
+						"propertyName": "Name",
+						"propertyKeyword": "name",
+						"shouldValidate": false,
+						"propertyTooltip": "",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Path",
+						"propertyKeyword": "indexIncludedPath",
+						"shouldValidate": false,
+						"propertyTooltip": "Included path index expression",
+						"propertyType": "fieldList",
+						"template": "orderedList",
+						"attributeList": [
+							"",
+							"?",
+							"*"
+						],
+						"templateOptions": {
+							"allowCustomValue": true,
+							"divider": "/",
+							"front": true
+						}
+					},
+					{
+						"propertyName": "Data types",
+						"propertyKeyword": "dataTypes",
+						"shouldValidate": false,
+						"propertyTooltip": "Data type: String, Number, Point, Polygon, or LineString",
+						"propertyType": "group",
+						"structure": [{
+							"propertyName": "Type",
+							"propertyKeyword": "spatialType",
+							"propertyType": "select",
+							"options": [
+								"Point",
+								"Polygon",
+								"MultiPolygon",
+								"LineString"
+							]
+						}]
+					},
+					{
+						"propertyName": "Description",
+						"propertyKeyword": "indexDescription",
+						"shouldValidate": false,
+						"propertyTooltip": "description",
+						"propertyType": "details",
+						"template": "textarea"
+					},
 					
 					{
 						"propertyName": "Comments",
@@ -502,83 +518,6 @@ making sure that you maintain a proper JSON format.
 						"template": "textarea"
 					}
 				]
-				},
-			{
-			"propertyName": "Spatial indexes",
-			"propertyType": "group",
-			"propertyKeyword": "spatialIndexes",
-			"shouldValidate": false,
-			"propertyTooltip": "",
-			"structure": [
-				{
-					"propertyName": "Name",
-					"propertyKeyword": "name",
-					"shouldValidate": false,
-					"propertyTooltip": "",
-					"propertyType": "text"
-				},
-				{
-					"propertyName": "Description",
-					"propertyKeyword": "indexDescription",
-					"shouldValidate": false,
-					"propertyTooltip": "description",
-					"propertyType": "details",
-					"template": "textarea"
-				},
-				{
-					"propertyName": "Included path",
-					"propertyKeyword": "indexIncludedPath",
-					"shouldValidate": false,
-					"propertyTooltip": "Included path index expression",
-					"propertyType": "fieldList",
-					"template": "orderedList",
-					"attributeList": [
-						"",
-						"?",
-						"*"
-					],
-					"templateOptions": {
-						"allowCustomValue": true,
-						"divider": "/",
-						"front": true
-					},
-					"dependency": {
-						"type": "not",
-						"values": [
-							{
-								"key": "kind",
-								"value": "Composite"
-							}
-						]
-					}
-				},
-				{
-					"propertyName": "Data types",
-					"propertyKeyword": "dataTypes",
-					"shouldValidate": false,
-					"propertyTooltip": "Data type: String, Number, Point, Polygon, or LineString",
-					"propertyType": "group",
-					"structure": [{
-						"propertyName": "Type",
-						"propertyKeyword": "spatialType",
-						"propertyType": "select",
-						"options": [
-							"Point",
-							"Polygon",
-							"MultiPolygon",
-							"LineString"
-						]
-					}]
-				},
-				{
-					"propertyName": "Comments",
-					"propertyKeyword": "indexComments",
-					"shouldValidate": false,
-					"propertyTooltip": "comments",
-					"propertyType": "details",
-					"template": "textarea"
-				}
-			]
 			},
 			{
 				"propertyName": "Composite indexes",
@@ -595,34 +534,33 @@ making sure that you maintain a proper JSON format.
 						"propertyType": "text"
 					},
 					{
+						"propertyName": "Path",
+						"propertyKeyword": "compositeFieldPath",
+						"shouldValidate": false,
+						"propertyType": "fieldList",
+						"template": "orderedList",
+						"templateOptions": {
+							"allowCustomValue": false,
+							"divider": "/",
+							"front": true
+						}
+					},
+					{
+						"propertyName": "Order",
+						"propertyKeyword": "compositeFieldOrder",
+						"propertyType": "select",
+						"options": [
+							"ascending",
+							"descending"
+						]
+					},
+					{
 						"propertyName": "Description",
 						"propertyKeyword": "indexDescription",
 						"shouldValidate": false,
 						"propertyTooltip": "description",
 						"propertyType": "details",
 						"template": "textarea"
-					},
-					{
-						"propertyName": "Composite fields",
-						"propertyKeyword": "compositeFields",
-						"propertyType": "group",
-						"structure": [{
-							"propertyName": "Path",
-							"propertyKeyword": "compositeFieldPath",
-							"propertyType": "text"
-						},{
-							"propertyName": "Order",
-							"propertyKeyword": "compositeFieldOrder",
-							"propertyType": "select",
-							"options": [
-								"ascending",
-								"descending"
-							]
-						}],
-						"attributeList": [
-							"ascending",
-							"descending"
-						]
 					},
 					{
 						"propertyName": "Comments",
@@ -633,9 +571,8 @@ making sure that you maintain a proper JSON format.
 						"template": "textarea"
 					}
 				]
-				}
-		
-	]
+			}
+		]
 	},
 	{
 		"lowerTab": "Stored Procs",
