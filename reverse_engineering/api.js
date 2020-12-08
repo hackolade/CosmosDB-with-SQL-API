@@ -441,28 +441,31 @@ function getIndexes(indexingPolicy){
 	return {
 		indexingMode: capitalizeFirstLetter(indexingPolicy.indexingMode || ''),
 		indexingAutomatic: indexingPolicy.automatic === true ? 'true' : 'false',
-		includedPaths: (indexingPolicy.includedPaths || []).map(index => {
+		includedPaths: (indexingPolicy.includedPaths || []).map((index, i) => {
 			return {
+				name: `Included (${i + 1})`,
 				indexIncludedPath: [getIndexPath(index.path)],
 				inclIndexes: (index.indexes || []).map(getRangeIndex),
 			};
 		}),
-		excludedPaths: indexingPolicy.excludedPaths.map(index => {
+		excludedPaths: indexingPolicy.excludedPaths.map((index, i) => {
 			return {
+				name: `Excluded (${i + 1})`,
 				indexExcludedPath: [getIndexPath(index.path)],
 				exclIndexes: (index.indexes || []).map(getRangeIndex),
 			};
 		}),
-		spatialIndexes: (indexingPolicy.spatialIndexes || []).map(index => {
+		spatialIndexes: (indexingPolicy.spatialIndexes || []).map((index, i) => {
 			return {
+				name: `Spatial (${i + 1})`,
 				indexIncludedPath: [getIndexPath(index.path)],
 				dataTypes: (index.types || []).map(spatialType => ({
 					spatialType,
 				})),
 			};
 		}),
-		compositeIndexes: (indexingPolicy.compositeIndexes || []).map(indexes => {
-			const compositeFieldPath = indexes.map(index => {
+		compositeIndexes: (indexingPolicy.compositeIndexes || []).map((indexes, i) => {
+			const compositeFieldPath = indexes.map((index, i) => {
 				return {
 					name: getKeyPath(index.path),
 					type: index.order || 'ascending',
@@ -470,6 +473,7 @@ function getIndexes(indexingPolicy){
 			}, {});
 
 			return {
+				name: `Composite (${i + 1})`,
 				compositeFieldPath,
 			};
 		}),

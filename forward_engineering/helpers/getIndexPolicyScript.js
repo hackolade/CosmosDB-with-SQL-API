@@ -30,7 +30,15 @@ const getPath = (paths = []) => {
 		return ['', ...pathItem.name.split('.').slice(1).map(escapeName), ''].join('/') + (pathItem.type || '*');
 	}
 
-	return pathItem.name + (pathItem.type || '*');
+	let name = pathItem.name;
+
+	if (!/\/$/.test(name)) {
+		name += '/';
+	}
+
+	name = name.split('/').map(escapeName).join('/');
+
+	return name + (pathItem.type || '*');
 };
 
 const getIndex = (_) => (item) => {
@@ -90,7 +98,7 @@ const getIndexPolicyScript = (_) => (containerData) => {
 	const indexTab = containerData[1] || {};
 
 	const indexScript = _.flow(
-		add('automatic', indexTab.automatic === 'true'),
+		add('automatic', indexTab.indexingAutomatic === 'true'),
 		add('indexingMode', indexTab.indexingMode),
 		add('includedPaths', getIncludedPath(_)(indexTab.includedPaths)),
 		add('excludedPaths', getExcludedPath(_)(indexTab.excludedPaths)),
