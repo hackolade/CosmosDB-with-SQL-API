@@ -18,6 +18,7 @@ module.exports = {
 	testConnection: async function(connectionInfo, logger, cb) {
 		logger.clear();
 		client = setUpDocumentClient(connectionInfo);
+		logger.log('info', connectionInfo, 'Reverse-Engineering connection settings', connectionInfo.hiddenKeys);
 		try {
 			await getDatabasesData();
 			return cb();
@@ -133,7 +134,7 @@ module.exports = {
 				const { autopilot, throughput } = getOfferProps(offerInfo);
 				const partitionKey = getPartitionKey(collection);
 				const indexes = getIndexes(collection.indexingPolicy);
-				const bucketInfo = {
+				const bucketInfo = Object.assign({
 					dbId: data.database,
 					throughput,
 					autopilot,
@@ -144,8 +145,7 @@ module.exports = {
 					udfs,
 					TTL: getTTL(collection.defaultTtl),
 					TTLseconds: collection.defaultTtl,
-					indexes,
-				};
+				}, indexes);
 
 				const documentsAmount = await getDocumentsAmount(containerInstance);
 				const size = getSampleDocSize(documentsAmount, recordSamplingSettings) || 1000;
@@ -425,12 +425,55 @@ function getSampleDocSize(count, recordSamplingSettings) {
 			: Math.round( count/100 * per);
 }
 
-function getIndexes(indexingPolicy){
-	const rangeIndexes = getRangeIndexes(indexingPolicy);
-	const spatialIndexes = getSpatialIndexes(indexingPolicy);
-	const compositeIndexes = getCompositeIndexes(indexingPolicy);
+function capitalizeFirstLetter(str) {
+	return str.charAt(0).toUpperCase() + str.slice(1);
+}
 
-	return rangeIndexes.concat(spatialIndexes).concat(compositeIndexes);
+function getRangeIndex(item) {
+	return {
+		kind: item.kind.toLowerCase() === 'hash' ? 'Hash' : 'Range',
+		dataType: capitalizeFirstLetter(item.dataType),
+		indexPrecision: !isNaN(Number(item.precision)) ? Number(item.precision) : -1,
+	};
+}
+
+function getIndexes(indexingPolicy){
+	return {
+		indexingMode: capitalizeFirstLetter(indexingPolicy.indexingMode || ''),
+		indexingAutomatic: indexingPolicy.automatic === true ? 'true' : 'false',
+		includedPaths: (indexingPolicy.includedPaths || []).map(index => {
+			return {
+				indexIncludedPath: [getIndexPath(index.path)],
+				inclIndexes: (index.indexes || []).map(getRangeIndex),
+			};
+		}),
+		excludedPaths: indexingPolicy.excludedPaths.map(index => {
+			return {
+				indexExcludedPath: [getIndexPath(index.path)],
+				exclIndexes: (index.indexes || []).map(getRangeIndex),
+			};
+		}),
+		spatialIndexes: (indexingPolicy.spatialIndexes || []).map(index => {
+			return {
+				indexIncludedPath: [getIndexPath(index.path)],
+				dataTypes: (index.types || []).map(spatialType => ({
+					spatialType,
+				})),
+			};
+		}),
+		compositeIndexes: (indexingPolicy.compositeIndexes || []).map(indexes => {
+			const compositeFieldPath = indexes.map(index => {
+				return {
+					name: getKeyPath(index.path),
+					type: index.order || 'ascending',
+				};
+			}, {});
+
+			return {
+				compositeFieldPath,
+			};
+		}),
+	};
 }
 
 const getIndexPathType = (path) => {
@@ -452,73 +495,6 @@ const getIndexPath = (path) => {
 		type,
 	};
 };
-
-function getRangeIndexes(indexingPolicy) {
-	let rangeIndexes = [];
-	const excludedPaths = indexingPolicy.excludedPaths.map(({ path }) => getIndexPath(path));
-	
-	if(indexingPolicy) {
-		indexingPolicy.includedPaths.forEach((item, i) => {
-			if (item.indexes) {
-				const indexes = item.indexes.map((index, j) => {
-					return {
-						name: `New Index(${j+1})`,
-						indexPrecision: index.precision,
-						automatic: indexingPolicy.automatic,
-						mode: indexingPolicy.indexingMode,
-						indexIncludedPath: [getIndexPath(item.path)],
-						indexExcludedPath: excludedPaths,
-						dataType: index.dataType,
-						kind: index.kind
-					};
-				});
-				rangeIndexes = rangeIndexes.concat(indexes);
-			} else {
-				const index = {
-					name: `New Index(${i+1})`,
-					automatic: indexingPolicy.automatic,
-					mode: indexingPolicy.indexingMode,
-					indexIncludedPath: [getIndexPath(item.path)],
-					indexExcludedPath: excludedPaths,
-					kind: 'Range'
-				}
-				rangeIndexes.push(index);
-			}
-		});
-	}
-	return rangeIndexes;
-}
-
-function getSpatialIndexes(indexingPolicy) {
-	if (!indexingPolicy.spatialIndexes) {
-		return [];
-	}
-	return indexingPolicy.spatialIndexes.map(item => {
-		return {
-			name: 'Spatial index',
-			automatic: indexingPolicy.automatic,
-			mode: indexingPolicy.indexingMode,
-			kind: 'Spatial',
-			indexIncludedPath: [getIndexPath(item.path)],
-			dataTypes: item.types.map(type => ({ spatialType: type }))
-		};
-	});
-}
-
-function getCompositeIndexes(indexingPolicy) {
-	if (!indexingPolicy.compositeIndexes) {
-		return [];
-	}
-	return indexingPolicy.compositeIndexes.map(item => {
-		return {
-			name: 'Composite index',
-			automatic: indexingPolicy.automatic,
-			mode: indexingPolicy.indexingMode,
-			kind: 'Composite',
-			compositeFields: item.map(({ order, path }) => ({ compositeFieldPath: path, compositeFieldOrder: order }))
-		};
-	});
-}
 
 const trimKey = (key) => {
 	const trimRegexp = /^\"([\s\S]+)\"$/i;

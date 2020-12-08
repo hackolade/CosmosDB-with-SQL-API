@@ -15,11 +15,19 @@ const add = (key, value) => obj => {
 	};
 };
 
+const escapeName = (name) => {
+	if (/^[a-z0-9_]*$/i.test(name)) {
+		return name;
+	} else {
+		return `"${name}"`;
+	}
+};
+
 const getPath = (paths = []) => {
 	const pathItem = (paths[0] || {});
 
 	if (Array.isArray(pathItem.path) && pathItem.path.length !== 0) {
-		return ['', ...pathItem.name.split('.').slice(1), ''].join('/') + (pathItem.type || '');
+		return ['', ...pathItem.name.split('.').slice(1).map(escapeName), ''].join('/') + (pathItem.type || '*');
 	}
 
 	return pathItem.name + (pathItem.type || '*');
@@ -62,7 +70,7 @@ const getCompositeIndexes = (_) => (compositeIndexes = []) => {
 			const path = item.name.split('.');
 
 			return {
-				path: ['', ...path.slice(1)].join('/'),
+				path: ['', ...path.slice(1).map(escapeName)].join('/'),
 				order: item.type || 'ascending',
 			};
 		}), (a, b) => a.path === b.path);
