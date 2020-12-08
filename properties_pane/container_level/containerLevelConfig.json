@@ -339,8 +339,11 @@ making sure that you maintain a proper JSON format.
 								"propertyKeyword": "indexPrecision",
 								"shouldValidate": false,
 								"propertyTooltip": "1-8 or -1 (Maximum precision) for numbers, 1-100 (Maximum precision) for string",
-								"propertyType": "text",
-								"valueType": "number"
+								"propertyType": "numeric",
+								"valueType": "number",
+								"allowNegative": true,
+								"minValue": -1,
+								"maxValue": 100
 							}
 						]
 					},
@@ -430,7 +433,10 @@ making sure that you maintain a proper JSON format.
 								"shouldValidate": false,
 								"propertyTooltip": "1-8 or -1 (Maximum precision) for numbers, 1-100 (Maximum precision) for string",
 								"propertyType": "text",
-								"valueType": "number"
+								"valueType": "number",
+								"allowNegative": true,
+								"minValue": -1,
+								"maxValue": 100
 							}
 						]
 					},
@@ -545,15 +551,9 @@ making sure that you maintain a proper JSON format.
 						"templateOptions": {
 							"allowCustomValue": false,
 							"divider": "/",
-							"front": true,
-							"maxField": 1
-						}
-					},
-					{
-						"propertyName": "Order",
-						"propertyKeyword": "compositeFieldOrder",
-						"propertyType": "select",
-						"options": [
+							"front": true
+						},
+						"attributeList": [
 							"ascending",
 							"descending"
 						]

@@ -22,7 +22,7 @@ const getPath = (paths = []) => {
 		return ['', ...pathItem.name.split('.').slice(1), ''].join('/') + (pathItem.type || '');
 	}
 
-	return pathItem.name + (pathItem.type || '');
+	return pathItem.name + (pathItem.type || '*');
 };
 
 const getIndex = (_) => (item) => {
@@ -54,18 +54,26 @@ const getExcludedPath = (_) => (excludedPaths = []) => {
 
 const getCompositeIndexes = (_) => (compositeIndexes = []) => {
 	return compositeIndexes.map(item => {
-		return _.flow(
-			add('path', getPath(item.compositeFieldPath)),
-			add('order', item.compositeFieldOrder || 'ascending'),
-		)({});
-	});
+		if (!Array.isArray(item.compositeFieldPath)) {
+			return;
+		}
+
+		return _.uniqWith(item.compositeFieldPath.map(item => {
+			const path = item.name.split('.');
+
+			return {
+				path: ['', ...path.slice(1)].join('/'),
+				order: item.type || 'ascending',
+			};
+		}), (a, b) => a.path === b.path);
+	}).filter(Boolean);
 };
 
 const getSpatialIndexes = (_) => (spatialIndexes = []) => {
 	return spatialIndexes.map(item => {
 		return _.flow(
 			add('path', getPath(item.indexIncludedPath)),
-			add('dataTypes', (item.dataTypes || []).map(dataType => dataType.spatialType).filter(Boolean)),
+			add('types', (item.dataTypes || []).map(dataType => dataType.spatialType).filter(Boolean)),
 		)({});
 	});
 };
