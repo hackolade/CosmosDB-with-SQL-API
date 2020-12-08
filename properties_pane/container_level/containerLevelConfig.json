@@ -251,7 +251,7 @@ making sure that you maintain a proper JSON format.
 		"structure": [
 			{
 				"propertyName": "Mode",
-				"propertyKeyword": "mode",
+				"propertyKeyword": "indexingMode",
 				"shouldValidate": false,
 				"propertyTooltip": "Indexing mode: consistent, lazy, or none",
 				"propertyType": "select",
@@ -263,7 +263,7 @@ making sure that you maintain a proper JSON format.
 			},
 			{
 				"propertyName": "Automatic",
-				"propertyKeyword": "automatic",
+				"propertyKeyword": "indexingAutomatic",
 				"shouldValidate": false,
 				"propertyTooltip": "Automatic indexing: true or false",
 				"propertyType": "select",
@@ -301,7 +301,8 @@ making sure that you maintain a proper JSON format.
 						"templateOptions": {
 							"allowCustomValue": true,
 							"divider": "/",
-							"front": true
+							"front": true,
+							"maxField": 1
 						}
 					},
 					{
@@ -390,7 +391,8 @@ making sure that you maintain a proper JSON format.
 						"templateOptions": {
 							"allowCustomValue": true,
 							"divider": "/",
-							"front": true
+							"front": true,
+							"maxField": 1
 						}
 					},
 					{
@@ -479,7 +481,8 @@ making sure that you maintain a proper JSON format.
 						"templateOptions": {
 							"allowCustomValue": true,
 							"divider": "/",
-							"front": true
+							"front": true,
+							"maxField": 1
 						}
 					},
 					{
@@ -542,7 +545,8 @@ making sure that you maintain a proper JSON format.
 						"templateOptions": {
 							"allowCustomValue": false,
 							"divider": "/",
-							"front": true
+							"front": true,
+							"maxField": 1
 						}
 					},
 					{
