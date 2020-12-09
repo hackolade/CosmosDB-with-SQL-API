@@ -1,0 +1,12 @@
+{
+	"extension": "json",
+	"filterName": "Indexing Policy",
+	"namePrefix": "CosmosDB SQL API",
+	"hasUpdateScript": false,
+	"level": {
+		"entity": false,
+		"container": true,
+		"view": false
+	},
+	"applyScriptToInstance": false
+}

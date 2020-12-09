@@ -15,7 +15,8 @@
 			]
 		},
 		"features": {
-			"nestedCollections": false
+			"nestedCollections": false,
+			"enableForwardEngineering": true
 		}
 	},
 	"description": "Hackolade plugin for Azure Cosmos DB with SQL API"
