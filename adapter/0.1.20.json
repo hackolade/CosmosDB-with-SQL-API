@@ -45,8 +45,7 @@
 		"container": [
 			["convertPathToFieldLink", ["partitionKey"]],
 			["convertPathToFieldLink", ["uniqueKey", "attributePath"]],
-			["convertPathToFieldLink", ["indexes", "indexIncludedPath"]],
-			["convertPathToFieldLink", ["indexes", "indexExcludedPath"]]
+			["convertCosmosDbIndexes"]
 		]
 	}
 }
