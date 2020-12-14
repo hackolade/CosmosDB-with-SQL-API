@@ -5,7 +5,6 @@
 		"type": "string",
 		"required": true,
 		"primaryKey": true,
-		"partitionKey": true,
-		"containerLink": ["partitionKey"]
+		"partitionKey": true
 	}]
 }
