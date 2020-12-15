@@ -40,15 +40,7 @@ const getPath = (paths = []) => {
 		return ['', ...pathItem.name.split('.').slice(1).map(prepareName), ''].join('/') + (pathItem.type || '*');
 	}
 
-	let name = pathItem.name;
-
-	if (!/\/$/.test(name)) {
-		name += '/';
-	}
-
-	name = name.split('/').map(prepareName).join('/');
-
-	return name + (pathItem.type || '*');
+	return pathItem.name;
 };
 
 const getIndex = (_) => (item) => {
