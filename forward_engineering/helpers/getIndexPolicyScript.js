@@ -58,7 +58,7 @@ const getIncludedPath = (_) => (includedPaths = []) => {
 			add('path', getPath(item.indexIncludedPath)),
 			add('indexes', (item.inclIndexes || []).map(getIndex(_))),
 		)({});
-	});
+	}).filter(item => !_.isEmpty(item));
 };
 
 const getExcludedPath = (_) => (excludedPaths = []) => {
@@ -67,7 +67,7 @@ const getExcludedPath = (_) => (excludedPaths = []) => {
 			add('path', getPath(item.indexExcludedPath)),
 			add('indexes', (item.exclIndexes || []).map(getIndex(_))),
 		)({});
-	});
+	}).filter(item => !_.isEmpty(item));
 };
 
 const getCompositeIndexes = (_) => (compositeIndexes = []) => {
@@ -83,8 +83,8 @@ const getCompositeIndexes = (_) => (compositeIndexes = []) => {
 				path: ['', ...path.slice(1).map(prepareName)].join('/'),
 				order: item.type || 'ascending',
 			};
-		}), (a, b) => a.path === b.path);
-	}).filter(Boolean);
+		}), (a, b) => a.path === b.path).filter(item => !_.isEmpty(item));
+	}).filter(item => !_.isEmpty(item));
 };
 
 const getSpatialIndexes = (_) => (spatialIndexes = []) => {
@@ -93,7 +93,7 @@ const getSpatialIndexes = (_) => (spatialIndexes = []) => {
 			add('path', getPath(item.indexIncludedPath)),
 			add('types', (item.dataTypes || []).map(dataType => dataType.spatialType).filter(Boolean)),
 		)({});
-	});
+	}).filter(item => !_.isEmpty(item) && item.path);
 };
 
 const getIndexPolicyScript = (_) => (containerData) => {
