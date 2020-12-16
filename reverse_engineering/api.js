@@ -348,10 +348,18 @@ function getDocumentKindDataFromInfer(data, probability){
 		let inference = data.inference.properties;
 
 		for(let key in inference){
-			if(inference[key]["%docs"] >= probability && inference[key].samples.length && typeof inference[key].samples[0] !== 'object'){
+			if (typeof inference[key].samples[0] === 'object') {
+				continue;
+			}
+
+			if(inference[key]["%docs"] >= probability && inference[key].samples.length){
 				suggestedDocKinds.push(key);
 
 				if(data.excludeDocKind.indexOf(key) === -1){
+					if (inference[key]["%docs"] === documentKind.probability && documentKind.key === 'type') {
+						continue;
+					}
+					
 					if(inference[key]["%docs"] >= documentKind.probability && inference[key].samples.length < minCount){
 						minCount = inference[key].samples.length;
 						documentKind.probability = inference[key]["%docs"];
