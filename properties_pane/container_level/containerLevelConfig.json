@@ -390,7 +390,7 @@ making sure that you maintain a proper JSON format.
 							"divider": "/",
 							"front": true,
 							"maxField": 1,
-							"checkbox": "/_etag",
+							"checkbox": "/_etag/?",
 							"root": true,
 							"ending": {
 								"document": "*",
