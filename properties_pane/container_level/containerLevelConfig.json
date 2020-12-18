@@ -215,11 +215,8 @@ making sure that you maintain a proper JSON format.
 				"propertyType": "numeric",
 				"valueType": "number",
 				"dependency": {
-					"type": "not",
-					"values": {
-						"key": "autopilot",
-						"value": true
-					}
+					"key": "autopilot",
+					"value": false
 				}
 			},
 			{
