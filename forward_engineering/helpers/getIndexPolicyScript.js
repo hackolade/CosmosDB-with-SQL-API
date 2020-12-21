@@ -37,7 +37,8 @@ const getPath = (paths = []) => {
 	const pathItem = (paths[0] || {});
 
 	if (Array.isArray(pathItem.path) && pathItem.path.length !== 0) {
-		return ['', ...pathItem.name.split('.').slice(1).map(prepareName), ''].join('/') + (pathItem.type || '*');
+		const name = pathItem.name.split('/');
+		return ['', ...name.slice(1, -1).map(prepareName), ''].join('/') + name[name.length - 1];
 	}
 
 	return pathItem.name;
@@ -77,7 +78,7 @@ const getCompositeIndexes = (_) => (compositeIndexes = []) => {
 		}
 
 		return _.uniqWith(item.compositeFieldPath.map(item => {
-			const path = item.name.split('.');
+			const path = item.name.split('/');
 
 			return {
 				path: ['', ...path.slice(1).map(prepareName)].join('/'),

@@ -296,16 +296,16 @@ making sure that you maintain a proper JSON format.
 						"propertyTooltip": "Included path index expression",
 						"propertyType": "fieldList",
 						"template": "orderedList",
-						"attributeList": [
-							"",
-							"?",
-							"*"
-						],
 						"templateOptions": {
-							"allowCustomValue": true,
 							"divider": "/",
 							"front": true,
-							"maxField": 1
+							"maxField": 1,
+							"root": true,
+							"ending": {
+								"document": "*",
+								"array": "[]",
+								"default": "?"
+							}
 						}
 					},
 					{
@@ -389,16 +389,17 @@ making sure that you maintain a proper JSON format.
 						"propertyTooltip": "Excluded path index expression",
 						"propertyType": "fieldList",
 						"template": "orderedList",
-						"attributeList": [
-							"",
-							"?",
-							"*"
-						],
 						"templateOptions": {
-							"allowCustomValue": true,
 							"divider": "/",
 							"front": true,
-							"maxField": 1
+							"maxField": 1,
+							"checkbox": "/_etag/?",
+							"root": true,
+							"ending": {
+								"document": "*",
+								"array": "[]",
+								"default": "?"
+							}
 						}
 					},
 					{
@@ -482,16 +483,16 @@ making sure that you maintain a proper JSON format.
 						"propertyTooltip": "Included path index expression",
 						"propertyType": "fieldList",
 						"template": "orderedList",
-						"attributeList": [
-							"",
-							"?",
-							"*"
-						],
 						"templateOptions": {
-							"allowCustomValue": true,
 							"divider": "/",
 							"front": true,
-							"maxField": 1
+							"maxField": 1,
+							"root": true,
+							"ending": {
+								"document": "*",
+								"array": "[]",
+								"default": "?"
+							}
 						}
 					},
 					{
