@@ -180,9 +180,12 @@ making sure that you maintain a proper JSON format.
 			{
 				"propertyName": "Database ID",
 				"propertyKeyword": "dbId",
-				"shouldValidate": false,
+				"shouldValidate": true,
 				"propertyTooltip": "A database is a logical container of one or more containers",
-				"propertyType": "text"
+				"propertyType": "text",
+				"validation": {
+					"required": true
+				}
 			},
 			{
 				"propertyName": "Description",
@@ -298,6 +301,7 @@ making sure that you maintain a proper JSON format.
 							"front": true,
 							"maxField": 1,
 							"root": true,
+							"lastArray": "*",
 							"ending": {
 								"document": "*",
 								"array": "[]",
@@ -392,6 +396,7 @@ making sure that you maintain a proper JSON format.
 							"maxField": 1,
 							"checkbox": "/_etag/?",
 							"root": true,
+							"lastArray": "*",
 							"ending": {
 								"document": "*",
 								"array": "[]",
@@ -485,6 +490,7 @@ making sure that you maintain a proper JSON format.
 							"front": true,
 							"maxField": 1,
 							"root": true,
+							"lastArray": "*",
 							"ending": {
 								"document": "*",
 								"array": "[]",

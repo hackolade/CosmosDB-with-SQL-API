@@ -22,7 +22,8 @@
 	"container": {
 		"name": "New container",
 		"partitionKey": [],
-		"indexes": []
+		"indexes": [],
+		"autopilot": false
 	},
 	"collection": {
 		"collectionName": "New item type",

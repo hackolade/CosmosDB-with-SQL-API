@@ -1,11 +1,11 @@
 {
 	"name": "CosmosDB-with-SQL-API",
 	"version": "0.1.20",
-	"versionDate": "2020-11-13",
+	"versionDate": "2020-12-22",
 	"author": "hackolade",
 	"engines": {
-		"hackolade": "4.2.15",
-		"hackoladePlugin": "1.0.0"
+		"hackolade": "4.3.1",
+		"hackoladePlugin": "1.0.1"
 	},
 	"contributes": {
 		"target": {
