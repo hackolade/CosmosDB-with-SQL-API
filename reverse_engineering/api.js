@@ -1,6 +1,6 @@
 'use strict';
 
-const { CosmosClient } = require('@azure/cosmos');
+const setUpDocumentClient = require('./helpers/setUpDocumentClient');
 const _ = require('lodash');
 const axios = require('axios');
 const qs = require('qs');
@@ -617,25 +617,6 @@ function getSamplingInfo(recordSamplingSettings, fieldInference) {
 	samplingInfo.recordSampling = `${recordSamplingSettings.active} ${value}${unit}`
 	samplingInfo.fieldInference = (fieldInference.active === 'field') ? 'keep field order' : 'alphabetical order';
 	return samplingInfo;
-}
-
-function getEndpoint(data) {
-	const hostWithPort = /:\d+/;
-	if (hostWithPort.test(data.host)) {
-		return data.host;
-	}
-	if (data.port) {
-		return data.host + ':' + (data.port || '443');
-	}
-}
-
-function setUpDocumentClient(connectionInfo) {
-	const endpoint = getEndpoint(connectionInfo);
-	const key = connectionInfo.accountKey;
-	if ((connectionInfo.disableSSL)) {
-		process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
-	}
-	return new CosmosClient({ endpoint, key });
 }
 
 async function getAdditionalAccountInfo(connectionInfo, logger) {
