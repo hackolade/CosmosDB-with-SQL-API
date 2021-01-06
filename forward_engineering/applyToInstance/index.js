@@ -47,24 +47,26 @@ module.exports = {
 	testConnection: reApi.testConnection,
 	async applyToInstance(connectionInfo, logger, callback, app) {
 		try {
+			const _ = app.require('lodash');
 			logger.progress = logger.progress || (() => {});
 			logger.clear();
 			logger.log('info', connectionInfo, 'Apply to instance connection settings', connectionInfo.hiddenKeys);
 			const client = setUpDocumentClient(connectionInfo);
 			const script = JSON.parse(connectionInfo.script);
-			const containerId = script.containerId;
+			const databaseId = _.get(connectionInfo, 'containerData[0].dbId');
+			const containerId = _.get(connectionInfo, 'containerData[0].name');
 
-			if (!script.databaseId) {
+			if (!databaseId) {
 				return callback({
 					message: 'Database ID is required. Please, set it on container level.',
 				});
 			}
 
-			const progress = createLogger(logger, script.databaseId, containerId);
+			const progress = createLogger(logger, databaseId, containerId);
 			
 			progress('Create database if not exists...');
 
-			const { database } = await client.databases.createIfNotExists({ id: script.databaseId });
+			const { database } = await client.databases.createIfNotExists({ id: databaseId });
 			
 			progress('Create container  if not exists ...');
 
