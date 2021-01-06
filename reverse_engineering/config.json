@@ -4,5 +4,6 @@
 		"WRONG_CONNECTION": "Can not connect to the Cosmos DB instance"
 	},
 	"excludeDocKind": ["id"],
-	"scenario": "getDatabases"
+	"scenario": "getDatabases",
+	"connectionList": [ "name", "host", "port" ]
 }

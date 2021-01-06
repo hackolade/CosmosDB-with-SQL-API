@@ -6,8 +6,6 @@ module.exports = {
 		try {
 			const _ = app.require('lodash');
 			const script = {
-				databaseId: data.containerData[0].dbId,
-				containerId: data.containerData[0].name,
 				indexingPolicy: getIndexPolicyScript(_)(data.containerData),
 				sample: data.entities.map(entityId => updateSample(
 					JSON.parse(data.jsonData[entityId]),
@@ -26,8 +24,6 @@ module.exports = {
 		try {
 			const _ = app.require('lodash');
 			const script = {
-				databaseId: data.containerData[0].dbId,
-				containerId: data.containerData[0].name,
 				indexingPolicy: getIndexPolicyScript(_)(data.containerData),
 				sample: updateSample(
 					JSON.parse(data.jsonData),
