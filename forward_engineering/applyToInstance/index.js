@@ -117,9 +117,6 @@ module.exports = {
 			const { container, resource: containerDef } = await database.containers.createIfNotExists({
 				id: containerId,
 				partitionKey: getPartitionKey(_)(containerData),
-				uniqueKeyPolicy: {
-					uniqueKeys: getUniqueKeys(_.get(containerData, '[0].uniqueKey')),
-				},
 				defaultTtl: helper.getTTL(containerData),
 			});
 
