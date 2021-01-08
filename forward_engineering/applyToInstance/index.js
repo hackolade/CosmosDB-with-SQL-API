@@ -29,6 +29,22 @@ const addDataType = (indexes) => {
 	});
 };
 
+const addSpatialTypes = (spatialIndex) => {
+	if (Array.isArray(spatialIndex.types) && spatialIndex.types.length) {
+		return spatialIndex;
+	}
+	
+	return {
+		...spatialIndex,
+		types: [
+			"Point",
+			"LineString",
+			"Polygon",
+			"MultiPolygon"
+		]
+	};
+};
+
 const updateIndexingPolicy = (indexes) => {
 	const result = {...indexes};
 	
@@ -38,6 +54,10 @@ const updateIndexingPolicy = (indexes) => {
 
 	if (Array.isArray(result.excludedPaths)) {
 		result.excludedPaths = addDataType(result.excludedPaths);
+	}
+
+	if (Array.isArray(result.spatialIndexes)) {
+		result.spatialIndexes = result.spatialIndexes.map(addSpatialTypes);
 	}
 
 	return result;
@@ -95,6 +115,7 @@ module.exports = {
 
 			callback(null);
 		} catch (error) {
+			logger.log('error', error);
 			callback({
 				message: error.message,
 				stack: error.stack,
