@@ -16,7 +16,9 @@ const add = (key, value) => obj => {
 };
 
 const escapeName = (name) => {
-	if (/^[a-z0-9_]*$/i.test(name)) {
+	if (/^[0-9]/.test(name)) {
+		return `"${name}"`;
+	} else if (/^[a-z0-9_]*$/i.test(name)) {
 		return name;
 	} else {
 		return `"${name}"`;

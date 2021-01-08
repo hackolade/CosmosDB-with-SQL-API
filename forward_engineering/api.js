@@ -12,6 +12,7 @@ module.exports = {
 					data.containerData[0],
 					(data.entityData[entityId] || [])[0] || {},
 				)),
+				...addItems(_)(data.containerData),
 			};
 			return callback(null, JSON.stringify(script, null, 2));
 		} catch (e) {
@@ -30,6 +31,7 @@ module.exports = {
 					data.containerData[0],
 					data.entityData[0],
 				),
+				...addItems(_)(data.containerData),
 			};
 			return callback(null, JSON.stringify(script, null, 2));
 		} catch (e) {
@@ -54,4 +56,52 @@ const updateSample = (sample, containerData, entityData) => {
 		...sample,
 		[docType]: entityData.code || entityData.collectionName,
 	};
+};
+
+const add = (key, items, mapper) => (script) => {
+	if (!items.length) {
+		return script;
+	}
+
+	return {
+		...script,
+		[key]: mapper(items),
+	};
+};
+
+const addItems = (_) => (containerData) => {
+	return _.flow(
+		add('Stored Procedures', _.get(containerData, '[2].storedProcs', []), mapStoredProcs),
+		add('User Defined Functions', _.get(containerData, '[4].udfs', []), mapUDFs),
+		add('Triggers', _.get(containerData, '[3].triggers', []), mapTriggers),
+	)();
+};
+
+const mapUDFs = (udfs) => {
+	return udfs.map(udf => {
+		return {
+			id: udf.udfID,
+			body: udf.udfFunction,
+		};
+	});
+};
+
+const mapTriggers = (triggers) => {
+	return triggers.map(trigger => {
+		return {
+			id: trigger.triggerID,
+			body: trigger.triggerFunction,
+			triggerOperation: trigger.triggerOperation,
+			triggerType: trigger.prePostTrigger === 'Pre-Trigger' ? 'Pre' : 'Post'
+		};
+	});
+};
+
+const mapStoredProcs = (storedProcs) => {
+	return storedProcs.map(proc => {
+		return {
+			id: proc.storedProcID,
+			body: proc.storedProcFunction,
+		};
+	});
 };
