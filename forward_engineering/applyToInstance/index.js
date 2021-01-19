@@ -1,4 +1,5 @@
 const reApi = require('../../reverse_engineering/api');
+const executeWithTimeout = require('../../reverse_engineering/helpers/executeWithTimeout');
 const applyToInstanceHelper = require('./applyToInstanceHelper');
 
 const createOrUpdate = async (sample, container) => {
@@ -78,8 +79,8 @@ const getUniqueKeys = (uniqueKeys) => {
 module.exports = {
 	testConnection: reApi.testConnection,
 	async applyToInstance(connectionInfo, logger, callback, app) {
+		const _ = app.require('lodash');
 		try {
-			const _ = app.require('lodash');
 			const helper = applyToInstanceHelper(_);
 			logger.progress = logger.progress || (() => {});
 			logger.clear();
@@ -100,7 +101,7 @@ module.exports = {
 			
 			progress('Create database if not exists...');
 
-			const { database } = await client.databases.createIfNotExists({ id: databaseId });
+			const { database } = await executeWithTimeout(() => client.databases.createIfNotExists({ id: databaseId }));
 			
 			progress('Create container  if not exists ...');
 
@@ -151,6 +152,7 @@ module.exports = {
 
 			callback(null);
 		} catch (error) {
+			error.message = _.get(error, 'response.data.error.message', error.message || error.name);
 			logger.log('error', error);
 			callback({
 				message: error.message,

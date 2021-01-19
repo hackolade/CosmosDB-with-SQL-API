@@ -4,6 +4,7 @@ const setUpDocumentClient = require('./helpers/setUpDocumentClient');
 const _ = require('lodash');
 const axios = require('axios');
 const qs = require('qs');
+const executeWithTimeout = require('./helpers/executeWithTimeout');
 let client;
 
 module.exports = {
@@ -20,7 +21,7 @@ module.exports = {
 		client = setUpDocumentClient(connectionInfo);
 		logger.log('info', connectionInfo, 'Reverse-Engineering connection settings', connectionInfo.hiddenKeys);
 		try {
-			await getDatabasesData();
+			await executeWithTimeout(getDatabasesData);
 			return cb();
 		} catch(err) {
 			return cb(mapError(err));
