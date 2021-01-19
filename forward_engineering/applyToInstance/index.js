@@ -63,16 +63,6 @@ const updateIndexingPolicy = (indexes) => {
 	return result;
 };
 
-const getPartitionKey = (_) => (containerData) => {
-	const partitionKey = _.get(containerData, '[0].partitionKey[0].name');
-
-	if (!partitionKey) {
-		return;
-	}
-
-	return '/' + partitionKey.split('.').slice(1).join('/');
-};
-
 const getUniqueKeys = (uniqueKeys) => {
 	if (!uniqueKeys) {
 		return [];
@@ -116,7 +106,7 @@ module.exports = {
 
 			const { container, resource: containerDef } = await database.containers.createIfNotExists({
 				id: containerId,
-				partitionKey: getPartitionKey(_)(containerData),
+				partitionKey: script.partitionKey,
 				defaultTtl: helper.getTTL(containerData),
 			});
 
