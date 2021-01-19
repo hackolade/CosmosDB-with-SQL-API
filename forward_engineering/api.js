@@ -6,6 +6,7 @@ module.exports = {
 		try {
 			const _ = app.require('lodash');
 			const script = {
+				partitionKey: getPartitionKey(_)(data.containerData),
 				indexingPolicy: getIndexPolicyScript(_)(data.containerData),
 				sample: data.entities.map(entityId => updateSample(
 					JSON.parse(data.jsonData[entityId]),
@@ -25,6 +26,7 @@ module.exports = {
 		try {
 			const _ = app.require('lodash');
 			const script = {
+				partitionKey: getPartitionKey(_)(data.containerData),
 				indexingPolicy: getIndexPolicyScript(_)(data.containerData),
 				sample: updateSample(
 					JSON.parse(data.jsonData),
@@ -56,6 +58,10 @@ const updateSample = (sample, containerData, entityData) => {
 		...sample,
 		[docType]: entityData.code || entityData.collectionName,
 	};
+};
+
+const getPartitionKey = (_) => (containerData) => {
+	return _.get(containerData, '[0].partitionKey[0].name');
 };
 
 const add = (key, items, mapper) => (script) => {
