@@ -206,7 +206,7 @@ module.exports = {
 						indexes: [],
 						views: [],
 						validation: createSchemaByPartitionKeyPath(partitionKey, filteredDocuments),
-						docType: bucketName,
+						docType: 'type',
 						bucketInfo
 					};
 

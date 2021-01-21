@@ -61,7 +61,9 @@ const updateSample = (sample, containerData, entityData) => {
 };
 
 const getPartitionKey = (_) => (containerData) => {
-	return _.get(containerData, '[0].partitionKey[0].name');
+	const partitionKey = _.get(containerData, '[0].partitionKey[0].name', '').trim().replace(/\/$/, '');
+
+	return partitionKey;
 };
 
 const add = (key, items, mapper) => (script) => {
