@@ -438,14 +438,6 @@ function capitalizeFirstLetter(str) {
 	return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function getRangeIndex(item) {
-	return {
-		kind: item.kind.toLowerCase() === 'hash' ? 'Hash' : 'Range',
-		dataType: capitalizeFirstLetter(item.dataType),
-		indexPrecision: !isNaN(Number(item.precision)) ? Number(item.precision) : -1,
-	};
-}
-
 function getIndexes(indexingPolicy){
 	return {
 		indexingMode: capitalizeFirstLetter(indexingPolicy.indexingMode || ''),
@@ -454,14 +446,12 @@ function getIndexes(indexingPolicy){
 			return {
 				name: `Included (${i + 1})`,
 				indexIncludedPath: [getIndexPath(index.path)],
-				inclIndexes: (index.indexes || []).map(getRangeIndex),
 			};
 		}),
 		excludedPaths: indexingPolicy.excludedPaths.map((index, i) => {
 			return {
 				name: `Excluded (${i + 1})`,
 				indexExcludedPath: [getIndexPath(index.path)],
-				exclIndexes: (index.indexes || []).map(getRangeIndex),
 			};
 		}),
 		spatialIndexes: (indexingPolicy.spatialIndexes || []).map((index, i) => {
