@@ -66,7 +66,6 @@ const getIncludedPath = (_) => (includedPaths = []) => {
 	return includedPaths.map(item => {
 		return _.flow(
 			add('path', getPath(item.indexIncludedPath)),
-			add('indexes', (item.inclIndexes || []).map(getIndex(_))),
 		)({});
 	}).filter(item => !_.isEmpty(item));
 };
@@ -75,7 +74,6 @@ const getExcludedPath = (_) => (excludedPaths = []) => {
 	return excludedPaths.map(item => {
 		return _.flow(
 			add('path', getPath(item.indexExcludedPath)),
-			add('indexes', (item.exclIndexes || []).map(getIndex(_))),
 		)({});
 	}).filter(item => !_.isEmpty(item));
 };
