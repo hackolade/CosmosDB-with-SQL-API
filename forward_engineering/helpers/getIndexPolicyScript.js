@@ -36,7 +36,11 @@ const prepareName = (name) => {
 };
 
 const getPath = (paths = []) => {
-	const pathItem = (paths[0] || {});
+	const pathItem = paths[0];
+
+	if(!pathItem) {
+		return '';
+	}
 
 	if (Array.isArray(pathItem.path) && pathItem.path.length !== 0) {
 		const name = pathItem.name.split('/');
