@@ -1,7 +1,7 @@
 {
 	"name": "CosmosDB-with-SQL-API",
-	"version": "0.1.23",
-	"versionDate": "2021-01-22",
+	"version": "0.1.24",
+	"versionDate": "2021-02-19",
 	"author": "hackolade",
 	"engines": {
 		"hackolade": "4.3.1",
