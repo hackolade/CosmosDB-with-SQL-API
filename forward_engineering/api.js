@@ -5,17 +5,31 @@ module.exports = {
 	generateContainerScript(data, logger, callback, app) {
 		try {
 			const _ = app.require('lodash');
-			const script = {
+			const insertSamplesOption = _.get(data, 'options.additionalOptions', []).find(option => option.id === 'INCLUDE_SAMPLES') || {};
+			const withSamples = data.options.origin !== 'ui';
+			const samples = data.entities.map(entityId => updateSample(
+				JSON.parse(data.jsonData[entityId]),
+				data.containerData[0],
+				(data.entityData[entityId] || [])[0] || {},
+			));
+			const scriptData = {
 				partitionKey: getPartitionKey(_)(data.containerData),
 				indexingPolicy: getIndexPolicyScript(_)(data.containerData),
-				sample: data.entities.map(entityId => updateSample(
-					JSON.parse(data.jsonData[entityId]),
-					data.containerData[0],
-					(data.entityData[entityId] || [])[0] || {},
-				)),
+				...(withSamples && { sample: samples }),
 				...addItems(_)(data.containerData),
 			};
-			return callback(null, JSON.stringify(script, null, 2));
+			const script = JSON.stringify(scriptData, null, 2);
+			if (withSamples || !insertSamplesOption.value) {
+				return callback(null, script);
+			}
+
+			return callback(null, [
+				{ title: 'CosmosDB script', script },
+				{
+					title: 'Sample data',
+					script: JSON.stringify({ sample: samples }, null, 2),
+				},
+			]);
 		} catch (e) {
 			const error = { message: e.message, stack: e.stack };
 			logger.log('error', error, 'CosmosDB w\\ SQL API forward engineering error');
