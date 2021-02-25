@@ -86,7 +86,7 @@ module.exports = {
 			logger.clear();
 			logger.log('info', connectionInfo, 'Apply to instance connection settings', connectionInfo.hiddenKeys);
 			const client = helper.setUpDocumentClient(connectionInfo);
-			const script = JSON.parse(connectionInfo.script);
+			const script = parseScript(connectionInfo.script);
 			const containerData = _.get(connectionInfo, 'containerData');
 			const databaseId = _.get(containerData, '[0].dbId');
 			const containerId = _.get(containerData, '[0].name');
@@ -165,4 +165,19 @@ module.exports = {
 const createLogger = (logger, containerName, entityName) => (message) => {
 	logger.progress({ message, containerName, entityName });
 	logger.log('info', { message }, 'Applying to instance');
+};
+
+const parseScript = script => {
+	try {
+		return JSON.parse(script);
+	} catch (err) {
+		const [ main, sample ] = script.split(/\n}\n{\n/m);
+		const mainScript = JSON.parse(main + '}');
+		const sampleScript = JSON.parse('{' + sample);
+
+		return {
+			...mainScript,
+			sample: sampleScript
+		}
+	}
 };
