@@ -1,12 +1,24 @@
 {
 	"extension": "json",
-	"filterName": "Indexing Policy",
+	"filterName": "Cosmos DB script",
 	"namePrefix": "CosmosDB SQL API",
 	"hasUpdateScript": false,
 	"level": {
-		"entity": false,
+		"entity": true,
 		"container": true,
 		"view": false
 	},
-	"applyScriptToInstance": false
+	"additionalOptions": [{
+		"id": "INCLUDE_SAMPLES",
+		"value": true,
+		"name": "Include sample data",
+		"align": "right",
+		"level": {
+			"entity": false
+		}
+	}],
+	"splitView": {
+		"byAdditionalOptions": ["INCLUDE_SAMPLES"]
+	},
+	"applyScriptToInstance": true
 }

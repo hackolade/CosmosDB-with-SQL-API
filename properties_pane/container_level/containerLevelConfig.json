@@ -163,6 +163,9 @@ making sure that you maintain a proper JSON format.
 				"propertyType": "fieldList",
 				"template": "orderedList",
 				"templateOptions": {
+					"divider": "/",
+					"front": true,
+					"entityName": false,
 					"maxField": 1
 				}
 			},
@@ -180,9 +183,12 @@ making sure that you maintain a proper JSON format.
 			{
 				"propertyName": "Database ID",
 				"propertyKeyword": "dbId",
-				"shouldValidate": false,
+				"shouldValidate": true,
 				"propertyTooltip": "A database is a logical container of one or more containers",
-				"propertyType": "text"
+				"propertyType": "text",
+				"validation": {
+					"required": true
+				}
 			},
 			{
 				"propertyName": "Description",
@@ -298,54 +304,13 @@ making sure that you maintain a proper JSON format.
 							"front": true,
 							"maxField": 1,
 							"root": true,
+							"lastArray": "*",
 							"ending": {
 								"document": "*",
 								"array": "[]",
 								"default": "?"
 							}
 						}
-					},
-					{
-						"propertyName": "Indexes",
-						"propertyType": "group",
-						"propertyKeyword": "inclIndexes",
-						"shouldValidate": false,
-						"propertyTooltip": "",
-						"structure": [
-							{
-								"propertyName": "Kind",
-								"propertyKeyword": "kind",
-								"shouldValidate": false,
-								"propertyTooltip": "Index kind: Hash (equality queries), Range (equality, range or Order By queries), or Spatial (spatial queries)",
-								"propertyType": "select",
-								"options": [
-									"Hash",
-									"Range"
-								]
-							},
-							{
-								"propertyName": "Data type",
-								"propertyKeyword": "dataType",
-								"shouldValidate": false,
-								"propertyTooltip": "Data type: String, Number, Point, Polygon, or LineString (can contain only one entry per data type per path)",
-								"propertyType": "select",
-								"options": [
-									"String",
-									"Number"
-								]
-							},
-							{
-								"propertyName": "Precision",
-								"propertyKeyword": "indexPrecision",
-								"shouldValidate": false,
-								"propertyTooltip": "1-8 or -1 (Maximum precision) for numbers, 1-100 (Maximum precision) for string",
-								"propertyType": "numeric",
-								"valueType": "number",
-								"allowNegative": true,
-								"minValue": -1,
-								"maxValue": 100
-							}
-						]
 					},
 					{
 						"propertyName": "Description",
@@ -392,54 +357,13 @@ making sure that you maintain a proper JSON format.
 							"maxField": 1,
 							"checkbox": "/_etag/?",
 							"root": true,
+							"lastArray": "*",
 							"ending": {
 								"document": "*",
 								"array": "[]",
 								"default": "?"
 							}
 						}
-					},
-					{
-						"propertyName": "Indexes",
-						"propertyType": "group",
-						"propertyKeyword": "exclIndexes",
-						"shouldValidate": false,
-						"propertyTooltip": "",
-						"structure": [
-							{
-								"propertyName": "Kind",
-								"propertyKeyword": "kind",
-								"shouldValidate": false,
-								"propertyTooltip": "Index kind: Hash (equality queries), Range (equality, range or Order By queries), or Spatial (spatial queries)",
-								"propertyType": "select",
-								"options": [
-									"Hash",
-									"Range"
-								]
-							},
-							{
-								"propertyName": "Data type",
-								"propertyKeyword": "dataType",
-								"shouldValidate": false,
-								"propertyTooltip": "Data type: String, Number, Point, Polygon, or LineString (can contain only one entry per data type per path)",
-								"propertyType": "select",
-								"options": [
-									"String",
-									"Number"
-								]
-							},
-							{
-								"propertyName": "Precision",
-								"propertyKeyword": "indexPrecision",
-								"shouldValidate": false,
-								"propertyTooltip": "1-8 or -1 (Maximum precision) for numbers, 1-100 (Maximum precision) for string",
-								"propertyType": "text",
-								"valueType": "number",
-								"allowNegative": true,
-								"minValue": -1,
-								"maxValue": 100
-							}
-						]
 					},
 					{
 						"propertyName": "Description",
@@ -485,6 +409,7 @@ making sure that you maintain a proper JSON format.
 							"front": true,
 							"maxField": 1,
 							"root": true,
+							"lastArray": "*",
 							"ending": {
 								"document": "*",
 								"array": "[]",

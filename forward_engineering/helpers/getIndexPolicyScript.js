@@ -16,7 +16,9 @@ const add = (key, value) => obj => {
 };
 
 const escapeName = (name) => {
-	if (/^[a-z0-9_]*$/i.test(name)) {
+	if (/^[0-9]/.test(name)) {
+		return `"${name}"`;
+	} else if (/^[a-z0-9_]*$/i.test(name)) {
 		return name;
 	} else {
 		return `"${name}"`;
@@ -34,14 +36,25 @@ const prepareName = (name) => {
 };
 
 const getPath = (paths = []) => {
-	const pathItem = (paths[0] || {});
+	const pathItem = paths[0];
+
+	if(!pathItem) {
+		return '';
+	}
 
 	if (Array.isArray(pathItem.path) && pathItem.path.length !== 0) {
 		const name = pathItem.name.split('/');
 		return ['', ...name.slice(1, -1).map(prepareName), ''].join('/') + name[name.length - 1];
 	}
 
-	return pathItem.name;
+	const items = pathItem.name.split('/');
+	return items.slice(0, -1).map(name => {
+		if (/^"/.test(name) && /"$/.test(name)) {
+			return name;
+		}
+
+		return escapeName(name);
+	}).concat(items[items.length - 1]).join('/');
 };
 
 const getIndex = (_) => (item) => {
@@ -57,7 +70,6 @@ const getIncludedPath = (_) => (includedPaths = []) => {
 	return includedPaths.map(item => {
 		return _.flow(
 			add('path', getPath(item.indexIncludedPath)),
-			add('indexes', (item.inclIndexes || []).map(getIndex(_))),
 		)({});
 	}).filter(item => !_.isEmpty(item));
 };
@@ -66,7 +78,6 @@ const getExcludedPath = (_) => (excludedPaths = []) => {
 	return excludedPaths.map(item => {
 		return _.flow(
 			add('path', getPath(item.indexExcludedPath)),
-			add('indexes', (item.exclIndexes || []).map(getIndex(_))),
 		)({});
 	}).filter(item => !_.isEmpty(item));
 };

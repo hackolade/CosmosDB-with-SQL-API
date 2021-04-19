@@ -1,9 +1,10 @@
 'use strict';
 
-const { CosmosClient } = require('@azure/cosmos');
+const setUpDocumentClient = require('./helpers/setUpDocumentClient');
 const _ = require('lodash');
 const axios = require('axios');
 const qs = require('qs');
+const executeWithTimeout = require('./helpers/executeWithTimeout');
 let client;
 
 module.exports = {
@@ -20,7 +21,7 @@ module.exports = {
 		client = setUpDocumentClient(connectionInfo);
 		logger.log('info', connectionInfo, 'Reverse-Engineering connection settings', connectionInfo.hiddenKeys);
 		try {
-			await getDatabasesData();
+			await executeWithTimeout(getDatabasesData);
 			return cb();
 		} catch(err) {
 			return cb(mapError(err));
@@ -205,7 +206,7 @@ module.exports = {
 						indexes: [],
 						views: [],
 						validation: createSchemaByPartitionKeyPath(partitionKey, filteredDocuments),
-						docType: bucketName,
+						docType: 'type',
 						bucketInfo
 					};
 
@@ -437,14 +438,6 @@ function capitalizeFirstLetter(str) {
 	return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function getRangeIndex(item) {
-	return {
-		kind: item.kind.toLowerCase() === 'hash' ? 'Hash' : 'Range',
-		dataType: capitalizeFirstLetter(item.dataType),
-		indexPrecision: !isNaN(Number(item.precision)) ? Number(item.precision) : -1,
-	};
-}
-
 function getIndexes(indexingPolicy){
 	return {
 		indexingMode: capitalizeFirstLetter(indexingPolicy.indexingMode || ''),
@@ -453,14 +446,12 @@ function getIndexes(indexingPolicy){
 			return {
 				name: `Included (${i + 1})`,
 				indexIncludedPath: [getIndexPath(index.path)],
-				inclIndexes: (index.indexes || []).map(getRangeIndex),
 			};
 		}),
 		excludedPaths: indexingPolicy.excludedPaths.map((index, i) => {
 			return {
 				name: `Excluded (${i + 1})`,
 				indexExcludedPath: [getIndexPath(index.path)],
-				exclIndexes: (index.indexes || []).map(getRangeIndex),
 			};
 		}),
 		spatialIndexes: (indexingPolicy.spatialIndexes || []).map((index, i) => {
@@ -617,25 +608,6 @@ function getSamplingInfo(recordSamplingSettings, fieldInference) {
 	samplingInfo.recordSampling = `${recordSamplingSettings.active} ${value}${unit}`
 	samplingInfo.fieldInference = (fieldInference.active === 'field') ? 'keep field order' : 'alphabetical order';
 	return samplingInfo;
-}
-
-function getEndpoint(data) {
-	const hostWithPort = /:\d+/;
-	if (hostWithPort.test(data.host)) {
-		return data.host;
-	}
-	if (data.port) {
-		return data.host + ':' + (data.port || '443');
-	}
-}
-
-function setUpDocumentClient(connectionInfo) {
-	const endpoint = getEndpoint(connectionInfo);
-	const key = connectionInfo.accountKey;
-	if ((connectionInfo.disableSSL)) {
-		process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
-	}
-	return new CosmosClient({ endpoint, key });
 }
 
 async function getAdditionalAccountInfo(connectionInfo, logger) {
