@@ -131,7 +131,7 @@ module.exports = {
 				const triggers = await getTriggers(containerInstance);
 				const udfs = await getUdfs(containerInstance);
 				const collection = await getCollectionById(containerInstance);
-				const offerInfo = await getOfferType(collection);
+				const offerInfo = await getOfferType(collection, logger);
 				const { autopilot, throughput } = getOfferProps(offerInfo);
 				const partitionKey = getPartitionKey(collection);
 				const indexes = getIndexes(collection.indexingPolicy);
@@ -240,18 +240,24 @@ async function getCollectionById(containerInstance) {
 	return collection;
 }
 
-async function getOfferType(collection) {
-	const querySpec = {
-		query: 'SELECT * FROM root r WHERE  r.resource = @link',
-		parameters: [
-			{
-				name: '@link',
-				value: collection._self
-			}
-		]
-	};
-	const { resources: offer } = await client.offers.query(querySpec).fetchAll();
-	return offer.length > 0 && offer[0];
+async function getOfferType(collection, logger) {
+	try {
+		const querySpec = {
+			query: 'SELECT * FROM root r WHERE  r.resource = @link',
+			parameters: [
+				{
+					name: '@link',
+					value: collection._self
+				}
+			]
+		};
+		const { resources: offer } = await client.offers.query(querySpec).fetchAll();
+		return offer.length > 0 && offer[0];
+	} catch (e) {
+		logger.log('error', { message: e.message, stack: e.stack }, '[Warning] Error querying offers');
+
+		return;
+	}
 }
 
 async function getDatabasesData() {

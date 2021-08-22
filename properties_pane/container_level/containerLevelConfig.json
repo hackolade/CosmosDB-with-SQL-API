@@ -293,6 +293,13 @@ making sure that you maintain a proper JSON format.
 						"propertyType": "text"
 					},
 					{
+						"propertyName": "Activated",
+						"propertyKeyword": "isActivated",
+						"propertyTooltip": "Deactivated item will be not included in FE script",
+						"propertyType": "checkbox",
+						"defaultValue": true
+					},
+					{
 						"propertyName": "Path",
 						"propertyKeyword": "indexIncludedPath",
 						"shouldValidate": false,
@@ -343,6 +350,13 @@ making sure that you maintain a proper JSON format.
 						"shouldValidate": false,
 						"propertyTooltip": "",
 						"propertyType": "text"
+					},
+					{
+						"propertyName": "Activated",
+						"propertyKeyword": "isActivated",
+						"propertyTooltip": "Deactivated item will be not included in FE script",
+						"propertyType": "checkbox",
+						"defaultValue": true
 					},
 					{
 						"propertyName": "Path",
@@ -396,6 +410,13 @@ making sure that you maintain a proper JSON format.
 						"shouldValidate": false,
 						"propertyTooltip": "",
 						"propertyType": "text"
+					},
+					{
+						"propertyName": "Activated",
+						"propertyKeyword": "isActivated",
+						"propertyTooltip": "Deactivated item will be not included in FE script",
+						"propertyType": "checkbox",
+						"defaultValue": true
 					},
 					{
 						"propertyName": "Path",
@@ -467,6 +488,13 @@ making sure that you maintain a proper JSON format.
 						"shouldValidate": false,
 						"propertyTooltip": "",
 						"propertyType": "text"
+					},
+					{
+						"propertyName": "Activated",
+						"propertyKeyword": "isActivated",
+						"propertyTooltip": "Deactivated item will be not included in FE script",
+						"propertyType": "checkbox",
+						"defaultValue": true
 					},
 					{
 						"propertyName": "Path",
