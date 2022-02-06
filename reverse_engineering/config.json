@@ -5,5 +5,6 @@
 	},
 	"excludeDocKind": ["id"],
 	"scenario": "getDatabases",
-	"connectionList": [ "name", "host", "port" ]
+	"connectionList": [ "name", "host", "port" ],
+	"helpUrl": "https://hackolade.com/help/Azureinstance.html"
 }
