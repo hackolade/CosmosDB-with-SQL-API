@@ -23,7 +23,8 @@
 		"name": "New container",
 		"partitionKey": [],
 		"indexes": [],
-		"autopilot": false
+		"autopilot": false,
+		"capacityMode": "Provisioned throughput"
 	},
 	"collection": {
 		"collectionName": "New item type",

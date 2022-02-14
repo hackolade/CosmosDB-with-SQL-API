@@ -181,6 +181,13 @@ making sure that you maintain a proper JSON format.
 				}]
 			},
 			{
+				"propertyName": "Description",
+				"propertyKeyword": "description",
+				"propertyTooltip": "description",
+				"propertyType": "details",
+				"template": "textarea"
+			},
+			{
 				"propertyName": "Database ID",
 				"propertyKeyword": "dbId",
 				"shouldValidate": true,
@@ -191,17 +198,24 @@ making sure that you maintain a proper JSON format.
 				}
 			},
 			{
-				"propertyName": "Description",
-				"propertyKeyword": "description",
-				"propertyTooltip": "description",
-				"propertyType": "details",
-				"template": "textarea"
+				"propertyName": "Capacity mode",
+				"propertyKeyword": "capacityMode",
+				"propertyTooltip": "Choose the capacity mode",
+				"propertyType": "select",
+				"options": [
+					"Provisioned throughput",
+					"Serverless"
+				]
 			},
 			{
 				"propertyName": "Autoscale",
 				"propertyKeyword": "autopilot",
 				"propertyType": "checkbox",
-				"template": "boolean"
+				"template": "boolean",
+				"dependency": {
+					"key": "capacityMode",
+					"value": "Provisioned throughput"
+				}
 			},
 			{
 				"propertyName": "Maximum throughput (RU/s)",
@@ -210,8 +224,17 @@ making sure that you maintain a proper JSON format.
 				"propertyType": "numeric",
 				"valueType": "number",
 				"dependency": {
-					"key": "autopilot",
-					"value": true
+					"type": "and",
+					"values": [
+						{
+							"key": "autopilot",
+							"value": true
+						},
+						{
+							"key": "capacityMode",
+							"value": "Provisioned throughput"
+						}
+					]
 				}
 			},
 			{
@@ -221,8 +244,22 @@ making sure that you maintain a proper JSON format.
 				"propertyType": "numeric",
 				"valueType": "number",
 				"dependency": {
-					"key": "autopilot",
-					"value": false
+					"type": "and",
+					"values": [
+						{
+							"type": "not",
+							"values": [
+								{
+									"key": "autopilot",
+									"value": true
+								}
+							]
+						},
+						{
+							"key": "capacityMode",
+							"value": "Provisioned throughput"
+						}
+					]
 				}
 			},
 			{

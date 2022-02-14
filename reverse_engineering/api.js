@@ -132,11 +132,12 @@ module.exports = {
 				const udfs = await getUdfs(containerInstance);
 				const collection = await getCollectionById(containerInstance);
 				const offerInfo = await getOfferType(collection, logger);
-				const { autopilot, throughput } = getOfferProps(offerInfo);
+				const { autopilot, throughput, capacityMode } = getOfferProps(offerInfo);
 				const partitionKey = getPartitionKey(collection);
 				const indexes = getIndexes(collection.indexingPolicy);
 				const bucketInfo = Object.assign({
 					dbId: data.database,
+					capacityMode,
 					throughput,
 					autopilot,
 					partitionKey,
@@ -552,16 +553,24 @@ function getUniqueKeys(collection) {
 }
 
 function getOfferProps(offer) {
+	if (!offer) {
+		return {
+			capacityMode: 'Serverless',
+			autopilot: false,
+		};
+	}
 	const isAutopilotOn = _.get(offer, 'content.offerAutopilotSettings');
 	if (isAutopilotOn) {
 		return {
 			autopilot: true,
-			throughput: offer.content.offerAutopilotSettings.maximumTierThroughput
+			throughput: offer.content.offerAutopilotSettings.maximumTierThroughput,
+			capacityMode: 'Provisioned throughput',
 		};
 	}
 	return {
 		autopilot: false,
-		throughput: offer ? offer.content.offerThroughput : ''
+		throughput: offer ? offer.content.offerThroughput : '',
+		capacityMode: 'Provisioned throughput',
 	};
 }
 
