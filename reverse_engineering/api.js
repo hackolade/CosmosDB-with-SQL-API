@@ -285,7 +285,7 @@ async function getDocuments(container, maxItemCount) {
 		console.log(err);
 		logger.log('error', err);
 	}
-	return documents;
+	return documents.filter(Boolean);
 }
 
 async function getDocumentsAmount(container) {
