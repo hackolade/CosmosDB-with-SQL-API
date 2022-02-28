@@ -62,7 +62,7 @@ module.exports = {
 };
 
 const updateSample = (sample, containerData, entityData) => {
-	const docType = containerData.docTypeName;
+	const docType = containerData?.docTypeName;
 
 	if (!docType) {
 		return sample;

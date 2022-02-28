@@ -87,9 +87,9 @@ module.exports = {
 			logger.log('info', connectionInfo, 'Apply to instance connection settings', connectionInfo.hiddenKeys);
 			const client = helper.setUpDocumentClient(connectionInfo);
 			const script = parseScript(connectionInfo.script);
-			const containerData = _.get(connectionInfo, 'containerData');
-			const databaseId = _.get(containerData, '[0].dbId');
-			const containerId = _.get(containerData, '[0].name');
+			const containerData = _.get(connectionInfo, 'containerData[0]');
+			const databaseId = _.get(containerData, 'dbId');
+			const containerId = _.get(containerData, 'name');
 
 			if (!databaseId) {
 				return callback({
@@ -109,6 +109,8 @@ module.exports = {
 				id: containerId,
 				partitionKey: script.partitionKey,
 				defaultTtl: helper.getTTL(containerData),
+				...helper.getContainerThroughputProps(containerData),
+				
 			});
 
 			progress('Add sample documents ...');
