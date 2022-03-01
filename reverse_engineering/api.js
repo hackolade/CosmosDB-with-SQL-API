@@ -295,9 +295,17 @@ async function getDocumentsAmount(container) {
 }
 
 function filterDocuments(documents) {
+	const systemProperties = [
+		"_rid",
+		"_self",
+		"_etag",
+		"_attachments",
+		"_ts",
+	];
+
 	return documents.map(item =>{
 		for(let prop in item){
-			if(prop && prop[0] === '_'){
+			if (systemProperties.includes(prop)){
 				delete item[prop];
 			}
 		}
