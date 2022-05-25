@@ -20,5 +20,6 @@
 	"splitView": {
 		"byAdditionalOptions": ["INCLUDE_SAMPLES"]
 	},
-	"applyScriptToInstance": true
+	"applyScriptToInstance": true,
+	"refresh": true
 }
