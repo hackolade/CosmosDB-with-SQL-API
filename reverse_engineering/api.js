@@ -571,13 +571,13 @@ function getOfferProps(offer) {
 	if (isAutopilotOn) {
 		return {
 			autopilot: true,
-			throughput: offer.content.offerAutopilotSettings.maximumTierThroughput,
+			throughput: _.get(offer, 'content.offerAutopilotSettings.maximumTierThroughput', ''),
 			capacityMode: 'Provisioned throughput',
 		};
 	}
 	return {
 		autopilot: false,
-		throughput: offer ? offer.content.offerThroughput : '',
+		throughput: _.get(offer, 'content.offerThroughput', ''),
 		capacityMode: 'Provisioned throughput',
 	};
 }
