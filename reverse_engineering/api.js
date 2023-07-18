@@ -8,27 +8,27 @@ const executeWithTimeout = require('./helpers/executeWithTimeout');
 let client;
 
 module.exports = {
-	connect: function(connectionInfo, logger, cb) {
-		cb()
+	connect: function (connectionInfo, logger, cb) {
+		cb();
 	},
 
-	disconnect: function(connectionInfo, logger, cb) {
-		cb()
+	disconnect: function (connectionInfo, logger, cb) {
+		cb();
 	},
 
-	testConnection: async function(connectionInfo, logger, cb) {
+	testConnection: async function (connectionInfo, logger, cb) {
 		logger.clear();
 		client = setUpDocumentClient(connectionInfo);
 		logger.log('info', connectionInfo, 'Reverse-Engineering connection settings', connectionInfo.hiddenKeys);
 		try {
 			await executeWithTimeout(getDatabasesData);
 			return cb();
-		} catch(err) {
+		} catch (err) {
 			return cb(mapError(err));
 		}
 	},
 
-	getDatabases: async function(connectionInfo, logger, cb) {
+	getDatabases: async function (connectionInfo, logger, cb) {
 		client = setUpDocumentClient(connectionInfo);
 		logger.clear();
 		logger.log('info', connectionInfo, 'Reverse-Engineering connection settings', connectionInfo.hiddenKeys);
@@ -38,16 +38,16 @@ module.exports = {
 			const dbs = dbsData.map(item => item.id);
 			logger.log('info', dbs, 'All databases list', connectionInfo.hiddenKeys);
 			return cb(null, dbs);
-		} catch(err) {
+		} catch (err) {
 			logger.log('error', err);
 			return cb(mapError(err));
 		}
 	},
 
-	getDocumentKinds: async function(connectionInfo, logger, cb) {
+	getDocumentKinds: async function (connectionInfo, logger, cb) {
 		client = setUpDocumentClient(connectionInfo);
 		logger.log('info', connectionInfo, 'Reverse-Engineering connection settings', connectionInfo.hiddenKeys);
-		
+
 		try {
 			const collections = await listCollections(connectionInfo.database);
 			logger.log('collections list', collections, 'Mapped collection list');
@@ -55,48 +55,70 @@ module.exports = {
 				const containerInstance = client.database(connectionInfo.database).container(collectionData.id);
 
 				const documentsAmount = await getDocumentsAmount(containerInstance);
-				const size = getSampleDocSize(documentsAmount, connectionInfo.recordSamplingSettings) || 1000;
-				logger.log('info', { collectionItem: collectionData }, 'Getting documents for current collectionItem', connectionInfo.hiddenKeys);
+				const size = getSampleDocSize(documentsAmount, connectionInfo.recordSamplingSettings);
+				logger.log(
+					'info',
+					{ collectionItem: collectionData },
+					'Getting documents for current collectionItem',
+					connectionInfo.hiddenKeys,
+				);
 
 				const documents = await getDocuments(containerInstance, size);
 				const filteredDocuments = filterDocuments(documents);
 
 				const inferSchema = generateCustomInferSchema(filteredDocuments, { sampleSize: 20 });
-				const documentsPackage = getDocumentKindDataFromInfer({ bucketName: collectionData.id,
-					inference: inferSchema, isCustomInfer: true, excludeDocKind: connectionInfo.excludeDocKind }, 90);
+				const documentsPackage = getDocumentKindDataFromInfer(
+					{
+						bucketName: collectionData.id,
+						inference: inferSchema,
+						isCustomInfer: true,
+						excludeDocKind: connectionInfo.excludeDocKind,
+					},
+					90,
+				);
 
 				return documentsPackage;
 			});
 			const documentKinds = await Promise.all(documentKindsPromise);
 			cb(null, documentKinds);
-		} catch(err) {
+		} catch (err) {
 			console.log(err);
 			logger.log('error', err);
 			return cb(mapError(err));
 		}
 	},
 
-	getDbCollectionsNames: async function(connectionInfo, logger, cb) {
+	getDbCollectionsNames: async function (connectionInfo, logger, cb) {
 		try {
 			client = setUpDocumentClient(connectionInfo);
 			logger.log('info', connectionInfo, 'Reverse-Engineering connection settings', connectionInfo.hiddenKeys);
-			
-			logger.log('info', { Database: connectionInfo.database }, 'Getting collections list for current database', connectionInfo.hiddenKeys);
+
+			logger.log(
+				'info',
+				{ Database: connectionInfo.database },
+				'Getting collections list for current database',
+				connectionInfo.hiddenKeys,
+			);
 			const collections = await listCollections(connectionInfo.database);
-			
-			logger.log('info', { CollectionList: collections }, 'Collection list for current database', connectionInfo.hiddenKeys);
+
+			logger.log(
+				'info',
+				{ CollectionList: collections },
+				'Collection list for current database',
+				connectionInfo.hiddenKeys,
+			);
 			const collectionNames = collections.map(item => item.id);
-			
+
 			const items = await handleBucket(connectionInfo, collectionNames);
-			cb(null, items)
-		} catch(err) {
+			cb(null, items);
+		} catch (err) {
 			console.log(err);
 			logger.log('error', err);
 			return cb(mapError(err));
 		}
 	},
 
-	getDbCollectionsData: async function(data, logger, cb) {
+	getDbCollectionsData: async function (data, logger, cb) {
 		try {
 			logger.progress = logger.progress || (() => {});
 			client = setUpDocumentClient(data);
@@ -107,7 +129,7 @@ module.exports = {
 				'info',
 				getSamplingInfo(recordSamplingSettings, fieldInference),
 				'Reverse-Engineering sampling params',
-				data.hiddenKeys
+				data.hiddenKeys,
 			);
 
 			const bucketList = data.collectionData.dataBaseNames;
@@ -115,14 +137,17 @@ module.exports = {
 
 			const { resource: accountInfo } = await client.getDatabaseAccount();
 			const additionalAccountInfo = await getAdditionalAccountInfo(data, logger);
-			const modelInfo = Object.assign({
-				accountID: data.accountKey,
-				defaultConsistency: accountInfo.consistencyPolicy,
-				preferredLocation: accountInfo.writableLocations[0] ? accountInfo.writableLocations[0].name : '',
-				tenant: data.tenantId,
-				resGrp: data.resourceGroupName,
-				subscription: data.subscriptionId
-			}, additionalAccountInfo);
+			const modelInfo = Object.assign(
+				{
+					accountID: data.accountKey,
+					defaultConsistency: accountInfo.consistencyPolicy,
+					preferredLocation: accountInfo.writableLocations[0] ? accountInfo.writableLocations[0].name : '',
+					tenant: data.tenantId,
+					resGrp: data.resourceGroupName,
+					subscription: data.subscriptionId,
+				},
+				additionalAccountInfo,
+			);
 
 			logger.log('info', modelInfo, 'Model info', data.hiddenKeys);
 			const dbCollectionsPromise = bucketList.map(async bucketName => {
@@ -135,29 +160,32 @@ module.exports = {
 				const { autopilot, throughput, capacityMode } = getOfferProps(offerInfo);
 				const partitionKey = getPartitionKey(collection);
 				const indexes = getIndexes(collection.indexingPolicy);
-				const bucketInfo = Object.assign({
-					dbId: data.database,
-					capacityMode,
-					throughput,
-					autopilot,
-					partitionKey,
-					uniqueKey: getUniqueKeys(collection),
-					storedProcs,
-					triggers,
-					udfs,
-					TTL: getTTL(collection.defaultTtl),
-					TTLseconds: collection.defaultTtl,
-				}, indexes);
+				const bucketInfo = Object.assign(
+					{
+						dbId: data.database,
+						capacityMode,
+						throughput,
+						autopilot,
+						partitionKey,
+						uniqueKey: getUniqueKeys(collection),
+						storedProcs,
+						triggers,
+						udfs,
+						TTL: getTTL(collection.defaultTtl),
+						TTLseconds: collection.defaultTtl,
+					},
+					indexes,
+				);
 
 				const documentsAmount = await getDocumentsAmount(containerInstance);
-				const size = getSampleDocSize(documentsAmount, recordSamplingSettings) || 1000;
+				const size = getSampleDocSize(documentsAmount, recordSamplingSettings);
 
 				logger.progress({ message: 'Load documents...', containerName: data.database, entityName: bucketName });
 				const documents = await getDocuments(containerInstance, size);
 				logger.progress({
 					message: 'Documents have loaded.',
 					containerName: data.database,
-					entityName: bucketName
+					entityName: bucketName,
 				});
 				const filteredDocuments = filterDocuments(documents);
 				const documentKindName = data.documentKinds[collection.id].documentKindName || '*';
@@ -172,7 +200,7 @@ module.exports = {
 							indexes: [],
 							views: [],
 							validation: createSchemaByPartitionKeyPath(partitionKey, filteredDocuments),
-							bucketInfo
+							bucketInfo,
 						};
 						collectionPackages.push(documentsPackage);
 					} else {
@@ -189,7 +217,7 @@ module.exports = {
 								views: [],
 								validation: createSchemaByPartitionKeyPath(partitionKey, filteredDocuments),
 								docType: documentKindName,
-								bucketInfo
+								bucketInfo,
 							};
 
 							if (fieldInference.active === 'field') {
@@ -208,7 +236,7 @@ module.exports = {
 						views: [],
 						validation: createSchemaByPartitionKeyPath(partitionKey, filteredDocuments),
 						docType: 'type',
-						bucketInfo
+						bucketInfo,
 					};
 
 					if (fieldInference.active === 'field') {
@@ -223,18 +251,17 @@ module.exports = {
 
 			const dbCollections = await Promise.all(dbCollectionsPromise);
 			return cb(null, dbCollections, modelInfo);
-		} catch(err) {
+		} catch (err) {
 			logger.progress({
 				message: 'Error of connecting to the database ' + data.database + '.\n ' + err.message,
 				containerName: data.database,
-				entityName: ''
+				entityName: '',
 			});
 			logger.log('error', err);
 			return cb(mapError(err));
 		}
-	}
+	},
 };
-
 
 async function getCollectionById(containerInstance) {
 	const { resource: collection } = await containerInstance.read();
@@ -248,9 +275,9 @@ async function getOfferType(collection, logger) {
 			parameters: [
 				{
 					name: '@link',
-					value: collection._self
-				}
-			]
+					value: collection._self,
+				},
+			],
 		};
 		const { resources: offer } = await client.offers.query(querySpec).fetchAll();
 		return offer.length > 0 && offer[0];
@@ -264,7 +291,6 @@ async function getOfferType(collection, logger) {
 async function getDatabasesData() {
 	const dbResponse = await client.databases.readAll().fetchAll();
 	return dbResponse.resources;
-
 }
 
 async function listCollections(databaseId) {
@@ -277,11 +303,11 @@ async function getDocuments(container, maxItemCount) {
 	let documents = [];
 	try {
 		const docRequest = container.items.query(query, { enableCrossPartitionQuery: true, maxItemCount: 200 });
-		while(docRequest.hasMoreResults()) {
+		while (docRequest.hasMoreResults()) {
 			const { resources: docs } = await docRequest.fetchNext();
 			documents = documents.concat(docs);
 		}
-	} catch(err) {
+	} catch (err) {
 		console.log(err);
 		logger.log('error', err);
 	}
@@ -295,17 +321,11 @@ async function getDocumentsAmount(container) {
 }
 
 function filterDocuments(documents) {
-	const systemProperties = [
-		"_rid",
-		"_self",
-		"_etag",
-		"_attachments",
-		"_ts",
-	];
+	const systemProperties = ['_rid', '_self', '_etag', '_attachments', '_ts'];
 
-	return documents.map(item =>{
-		for(let prop in item){
-			if (systemProperties.includes(prop)){
+	return documents.map(item => {
+		for (let prop in item) {
+			if (systemProperties.includes(prop)) {
 				delete item[prop];
 			}
 		}
@@ -316,69 +336,75 @@ function filterDocuments(documents) {
 function generateCustomInferSchema(documents, params) {
 	function typeOf(obj) {
 		return {}.toString.call(obj).split(' ')[1].slice(0, -1).toLowerCase();
-	};
+	}
 
 	let sampleSize = params.sampleSize || 30;
 
 	let inferSchema = {
-		"#docs": 0,
-		"$schema": "http://json-schema.org/schema#",
-		"properties": {}
+		'#docs': 0,
+		'$schema': 'http://json-schema.org/schema#',
+		'properties': {},
 	};
 
 	documents.forEach(item => {
-		inferSchema["#docs"]++;
-		
-		for(let prop in item){
-			if(inferSchema.properties.hasOwnProperty(prop)){
-				inferSchema.properties[prop]["#docs"]++;
-				inferSchema.properties[prop]["samples"].indexOf(item[prop]) === -1 && inferSchema.properties[prop]["samples"].length < sampleSize? inferSchema.properties[prop]["samples"].push(item[prop]) : '';
-				inferSchema.properties[prop]["type"] = typeOf(item[prop]);
+		inferSchema['#docs']++;
+
+		for (let prop in item) {
+			if (inferSchema.properties.hasOwnProperty(prop)) {
+				inferSchema.properties[prop]['#docs']++;
+				inferSchema.properties[prop]['samples'].indexOf(item[prop]) === -1 &&
+				inferSchema.properties[prop]['samples'].length < sampleSize
+					? inferSchema.properties[prop]['samples'].push(item[prop])
+					: '';
+				inferSchema.properties[prop]['type'] = typeOf(item[prop]);
 			} else {
 				inferSchema.properties[prop] = {
-					"#docs": 1,
-					"%docs": 100,
-					"samples": [item[prop]],
-					"type": typeOf(item[prop])
-				}
+					'#docs': 1,
+					'%docs': 100,
+					'samples': [item[prop]],
+					'type': typeOf(item[prop]),
+				};
 			}
 		}
 	});
 
-	for (let prop in inferSchema.properties){
-		inferSchema.properties[prop]["%docs"] = Math.round((inferSchema.properties[prop]["#docs"] / inferSchema["#docs"] * 100), 2);
+	for (let prop in inferSchema.properties) {
+		inferSchema.properties[prop]['%docs'] = Math.round(
+			(inferSchema.properties[prop]['#docs'] / inferSchema['#docs']) * 100,
+			2,
+		);
 	}
 	return inferSchema;
 }
 
-function getDocumentKindDataFromInfer(data, probability){
+function getDocumentKindDataFromInfer(data, probability) {
 	let suggestedDocKinds = [];
 	let otherDocKinds = [];
 	let documentKind = {
 		key: '',
-		probability: 0	
+		probability: 0,
 	};
 
-	if(data.isCustomInfer){
+	if (data.isCustomInfer) {
 		let minCount = Infinity;
 		let inference = data.inference.properties;
 
-		for(let key in inference){
+		for (let key in inference) {
 			if (typeof inference[key].samples[0] === 'object') {
 				continue;
 			}
 
-			if(inference[key]["%docs"] >= probability && inference[key].samples.length){
+			if (inference[key]['%docs'] >= probability && inference[key].samples.length) {
 				suggestedDocKinds.push(key);
 
-				if(data.excludeDocKind.indexOf(key) === -1){
-					if (inference[key]["%docs"] === documentKind.probability && documentKind.key === 'type') {
+				if (data.excludeDocKind.indexOf(key) === -1) {
+					if (inference[key]['%docs'] === documentKind.probability && documentKind.key === 'type') {
 						continue;
 					}
-					
-					if(inference[key]["%docs"] >= documentKind.probability && inference[key].samples.length < minCount){
+
+					if (inference[key]['%docs'] >= documentKind.probability && inference[key].samples.length < minCount) {
 						minCount = inference[key].samples.length;
-						documentKind.probability = inference[key]["%docs"];
+						documentKind.probability = inference[key]['%docs'];
 						documentKind.key = key;
 					}
 				}
@@ -387,11 +413,11 @@ function getDocumentKindDataFromInfer(data, probability){
 			}
 		}
 	} else {
-		let flavor = (data.flavorValue) ? data.flavorValue.split(',') : data.inference[0].Flavor.split(',');
-		if(flavor.length === 1){
+		let flavor = data.flavorValue ? data.flavorValue.split(',') : data.inference[0].Flavor.split(',');
+		if (flavor.length === 1) {
 			suggestedDocKinds = Object.keys(data.inference[0].properties);
 			let matсhedDocKind = flavor[0].match(/([\s\S]*?) \= "?([\s\S]*?)"?$/);
-			documentKind.key = (matсhedDocKind.length) ? matсhedDocKind[1] : '';
+			documentKind.key = matсhedDocKind.length ? matсhedDocKind[1] : '';
 		}
 	}
 
@@ -400,18 +426,18 @@ function getDocumentKindDataFromInfer(data, probability){
 		documentList: suggestedDocKinds,
 		documentKind: documentKind.key,
 		preSelectedDocumentKind: data.preSelectedDocumentKind,
-		otherDocKinds
+		otherDocKinds,
 	};
 
 	return documentKindData;
 }
 
-async function handleBucket(connectionInfo, collectionsIds){
+async function handleBucket(connectionInfo, collectionsIds) {
 	const bucketItemsPromise = collectionsIds.map(async collectionId => {
 		const containerInstance = client.database(connectionInfo.database).container(collectionId);
 
 		const documentsAmount = await getDocumentsAmount(containerInstance);
-		const size = getSampleDocSize(documentsAmount, connectionInfo.recordSamplingSettings) || 1000;
+		const size = getSampleDocSize(documentsAmount, connectionInfo.recordSamplingSettings);
 
 		const documents = await getDocuments(containerInstance, size);
 		const filteredDocuments = filterDocuments(documents);
@@ -419,7 +445,7 @@ async function handleBucket(connectionInfo, collectionsIds){
 		const documentKind = connectionInfo.documentKinds[collectionId].documentKindName || '*';
 		let documentTypes = [];
 
-		if(documentKind !== '*'){
+		if (documentKind !== '*') {
 			documentTypes = filteredDocuments.map(doc => {
 				return doc[documentKind];
 			});
@@ -432,28 +458,31 @@ async function handleBucket(connectionInfo, collectionsIds){
 	return await Promise.all(bucketItemsPromise);
 }
 
-function prepareConnectionDataItem(documentTypes, bucketName){
+function prepareConnectionDataItem(documentTypes, bucketName) {
 	let uniqueDocuments = _.uniq(documentTypes);
 	let connectionDataItem = {
 		dbName: bucketName,
-		dbCollections: uniqueDocuments
+		dbCollections: uniqueDocuments,
 	};
 
 	return connectionDataItem;
 }
 
-function getSampleDocSize(count, recordSamplingSettings) {
-	let per = recordSamplingSettings.relative.value;
-	return (recordSamplingSettings.active === 'absolute')
-		? recordSamplingSettings.absolute.value
-			: Math.round( count/100 * per);
-}
+const getSampleDocSize = (count, recordSamplingSettings) => {
+	if (recordSamplingSettings.active === 'absolute') {
+		return Number(recordSamplingSettings.absolute.value);
+	}
+
+	const limit = Math.ceil((count * recordSamplingSettings.relative.value) / 100);
+
+	return Math.min(limit, recordSamplingSettings.maxValue);
+};
 
 function capitalizeFirstLetter(str) {
 	return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function getIndexes(indexingPolicy){
+function getIndexes(indexingPolicy) {
 	return {
 		indexingMode: capitalizeFirstLetter(indexingPolicy.indexingMode || ''),
 		indexingAutomatic: indexingPolicy.automatic === true ? 'true' : 'false',
@@ -494,7 +523,7 @@ function getIndexes(indexingPolicy){
 	};
 }
 
-const getIndexPathType = (path) => {
+const getIndexPathType = path => {
 	if (/\?$/.test(path)) {
 		return '?';
 	} else if (/\*$/.test(path)) {
@@ -504,7 +533,7 @@ const getIndexPathType = (path) => {
 	}
 };
 
-const getIndexPath = (path) => {
+const getIndexPath = path => {
 	const type = getIndexPathType(path);
 	const name = path.replace(/\/(\?|\*)$/, '');
 
@@ -514,7 +543,7 @@ const getIndexPath = (path) => {
 	};
 };
 
-const trimKey = (key) => {
+const trimKey = key => {
 	const trimRegexp = /^\"([\s\S]+)\"$/i;
 
 	if (!trimRegexp.test(key)) {
@@ -526,8 +555,13 @@ const trimKey = (key) => {
 	return result[1] || key;
 };
 
-const getKeyPath = (keyPath) => {
-	return (keyPath || '').split('/').filter(Boolean).map(trimKey).map(item => item === '[]' ? 0 : item).join('.');
+const getKeyPath = keyPath => {
+	return (keyPath || '')
+		.split('/')
+		.filter(Boolean)
+		.map(trimKey)
+		.map(item => (item === '[]' ? 0 : item))
+		.join('.');
 };
 
 function getPartitionKey(collection) {
@@ -549,15 +583,17 @@ function getUniqueKeys(collection) {
 		return [];
 	}
 
-	return collection.uniqueKeyPolicy.uniqueKeys.map(item => {
-		if (!Array.isArray(item.paths)) {
-			return;
-		}
+	return collection.uniqueKeyPolicy.uniqueKeys
+		.map(item => {
+			if (!Array.isArray(item.paths)) {
+				return;
+			}
 
-		return {
-			attributePath: item.paths.map(getKeyPath)
-		};
-	}).filter(Boolean);
+			return {
+				attributePath: item.paths.map(getKeyPath),
+			};
+		})
+		.filter(Boolean);
 }
 
 function getOfferProps(offer) {
@@ -587,8 +623,8 @@ async function getStoredProcedures(containerInstance) {
 	return resources.map((item, i) => {
 		return {
 			storedProcID: item.id,
-			name: `New Stored procedure(${i+1})`,
-			storedProcFunction: item.body
+			name: `New Stored procedure(${i + 1})`,
+			storedProcFunction: item.body,
 		};
 	});
 }
@@ -598,10 +634,10 @@ async function getTriggers(containerInstance) {
 	return resources.map((item, i) => {
 		return {
 			triggerID: item.id,
-			name: `New Trigger(${i+1})`,
+			name: `New Trigger(${i + 1})`,
 			prePostTrigger: item.triggerType === 'Pre' ? 'Pre-Trigger' : 'Post-Trigger',
 			triggerOperation: item.triggerOperation,
-			triggerFunction: item.body
+			triggerFunction: item.body,
 		};
 	});
 }
@@ -611,8 +647,8 @@ async function getUdfs(containerInstance) {
 	return resources.map((item, i) => {
 		return {
 			udfID: item.id,
-			name: `New UDFS(${i+1})`,
-			udfFunction: item.body
+			name: `New UDFS(${i + 1})`,
+			udfFunction: item.body,
 		};
 	});
 }
@@ -627,9 +663,9 @@ function getTTL(defaultTTL) {
 function getSamplingInfo(recordSamplingSettings, fieldInference) {
 	let samplingInfo = {};
 	let value = recordSamplingSettings[recordSamplingSettings.active].value;
-	let unit = (recordSamplingSettings.active === 'relative') ? '%' : ' records max';
-	samplingInfo.recordSampling = `${recordSamplingSettings.active} ${value}${unit}`
-	samplingInfo.fieldInference = (fieldInference.active === 'field') ? 'keep field order' : 'alphabetical order';
+	let unit = recordSamplingSettings.active === 'relative' ? '%' : ' records max';
+	samplingInfo.recordSampling = `${recordSamplingSettings.active} ${value}${unit}`;
+	samplingInfo.fieldInference = fieldInference.active === 'field' ? 'keep field order' : 'alphabetical order';
 	return samplingInfo;
 }
 
@@ -652,47 +688,49 @@ async function getAdditionalAccountInfo(connectionInfo, logger) {
 				grant_type: 'client_credentials',
 				client_id: clientId,
 				client_secret: appSecret,
-				resource: 'https://management.azure.com/'
+				resource: 'https://management.azure.com/',
 			}),
 			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded'
-			}
+				'Content-Type': 'application/x-www-form-urlencoded',
+			},
 		});
 		const dbAccountBaseUrl = `https://management.azure.com/subscriptions/${subscriptionId}/resourceGroups/${resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/${accountName}?api-version=2015-04-08`;
 		const { data: accountData } = await axios({
 			method: 'get',
 			url: dbAccountBaseUrl,
 			headers: {
-				'Authorization': `${tokenData.token_type} ${tokenData.access_token}`
-			}
+				'Authorization': `${tokenData.token_type} ${tokenData.access_token}`,
+			},
 		});
 		logger.progress({
 			message: 'Getting account information',
 			containerName: connectionInfo.database,
-			entityName: ''
+			entityName: '',
 		});
 		return {
 			enableMultipleWriteLocations: accountData.properties.enableMultipleWriteLocations,
 			enableAutomaticFailover: accountData.properties.enableAutomaticFailover,
 			isVirtualNetworkFilterEnabled: accountData.properties.isVirtualNetworkFilterEnabled,
-			virtualNetworkRules: accountData.properties.virtualNetworkRules.map(({ id, ignoreMissingVNetServiceEndpoint }) => ({
-				virtualNetworkId: id,
-				ignoreMissingVNetServiceEndpoint
-			})),
+			virtualNetworkRules: accountData.properties.virtualNetworkRules.map(
+				({ id, ignoreMissingVNetServiceEndpoint }) => ({
+					virtualNetworkId: id,
+					ignoreMissingVNetServiceEndpoint,
+				}),
+			),
 			ipRangeFilter: accountData.properties.ipRangeFilter,
 			tags: Object.entries(accountData.tags).map(([tagName, tagValue]) => ({ tagName, tagValue })),
 			locations: accountData.properties.locations.map(({ id, locationName, failoverPriority, isZoneRedundant }) => ({
 				locationId: id,
 				locationName,
 				failoverPriority,
-				isZoneRedundant
-			}))
+				isZoneRedundant,
+			})),
 		};
-	} catch(err) {
+	} catch (err) {
 		logger.log('error', { message: _.get(err, 'response.data.error.message', err.message), stack: err.stack });
 		logger.progress({
 			message: 'Error while getting account information',
-			containerName: connectionInfo.database
+			containerName: connectionInfo.database,
 		});
 		return {};
 	}
@@ -701,7 +739,7 @@ async function getAdditionalAccountInfo(connectionInfo, logger) {
 function mapError(error) {
 	return {
 		message: error.message,
-		stack: error.stack
+		stack: error.stack,
 	};
 }
 
@@ -715,23 +753,23 @@ function createSchemaByPartitionKeyPath(path, documents = []) {
 			return checkIfDocumentContainsPath(_.tail(path), value);
 		}
 		return false;
-	}
+	};
 
-	const getNestedObject = (path) => {
+	const getNestedObject = path => {
 		if (path.length === 1) {
 			return {
 				[path[0]]: {
 					primaryKey: true,
 					partitionKey: true,
-				}
-			}
+				},
+			};
 		}
 		return {
 			[path[0]]: {
-				properties: getNestedObject(_.tail(path))
-			}
+				properties: getNestedObject(_.tail(path)),
+			},
 		};
-	}
+	};
 
 	if (!Array.isArray(path)) {
 		return false;
@@ -747,11 +785,11 @@ function createSchemaByPartitionKeyPath(path, documents = []) {
 	}
 	if (!documents.some(doc => checkIfDocumentContainsPath(namePath, doc))) {
 		return false;
-	} 
+	}
 
 	return {
 		jsonSchema: {
-			properties: getNestedObject(namePath)
-		}
+			properties: getNestedObject(namePath),
+		},
 	};
 }
