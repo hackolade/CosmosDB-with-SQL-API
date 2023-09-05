@@ -157,6 +157,28 @@ making sure that you maintain a proper JSON format.
 		}],
 		"structure": [
 			{
+				"propertyName": "Hierarchical partition key",
+				"propertyKeyword": "hierarchicalPartitionKey",
+				"propertyType": "checkbox"
+			},
+			{
+				"propertyName": "Partition key",
+				"propertyKeyword": "partitionKey",
+				"propertyTooltip": "The Partition Key is a string only used to automatically partition data among multiple servers for scalability.  Choose a JSON property name that has a wide range of values and is likely to have evenly distributed access patterns.",
+				"propertyType": "fieldList",
+				"template": "orderedList",
+				"templateOptions": {
+					"divider": "/",
+					"front": true,
+					"entityName": false,
+					"maxField": 3
+				},
+				"dependency": {
+					"key": "hierarchicalPartitionKey",
+					"value": true
+				}
+			},
+			{
 				"propertyName": "Partition key",
 				"propertyKeyword": "partitionKey",
 				"propertyTooltip": "The Partition Key is a string only used to automatically partition data among multiple servers for scalability.  Choose a JSON property name that has a wide range of values and is likely to have evenly distributed access patterns.",
@@ -167,6 +189,13 @@ making sure that you maintain a proper JSON format.
 					"front": true,
 					"entityName": false,
 					"maxField": 1
+				},
+				"dependency": {
+					"type": "not",
+					"values": [{
+						"key": "hierarchicalPartitionKey",
+						"value": true
+					}]
 				}
 			},
 			{

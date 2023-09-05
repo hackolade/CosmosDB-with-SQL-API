@@ -173,9 +173,9 @@ const parseScript = script => {
 	try {
 		return JSON.parse(script);
 	} catch (err) {
-		const [ main, sample ] = script.split(/\n}\n{\n/m);
+		const [ main, sample ] = script.split(/\n}\n\[/m);
 		const mainScript = JSON.parse(main + '}');
-		const sampleScript = JSON.parse('{' + sample);
+		const sampleScript = JSON.parse('[' + sample);
 
 		return {
 			...mainScript,
