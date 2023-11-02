@@ -1,6 +1,7 @@
 const applyToInstanceHelper = require('./applyToInstance');
 const getIndexPolicyScript = require('./helpers/getIndexPolicyScript');
 const { PARTITION_KEY_DEFINITION_VERSION, PARTITION_KEY_KIND } = require('../shared/constants');
+const { getUniqueKeyPolicyScript } = require('./helpers/getUniqueKeyPolicyScript');
 
 module.exports = {
 	generateContainerScript(data, logger, callback, app) {
@@ -13,8 +14,10 @@ module.exports = {
 				data.containerData[0],
 				(data.entityData[entityId] || [])[0] || {},
 			));
+			const uniqueKeys = _.get(data.containerData, '[0].uniqueKey', []);
 			const scriptData = {
 				partitionKey: getPartitionKey(_)(data.containerData),
+				...(uniqueKeys.length && getUniqueKeyPolicyScript(uniqueKeys)),
 				indexingPolicy: getIndexPolicyScript(_)(data.containerData),
 				...(withSamples && { sample: samples }),
 				...addItems(_)(data.containerData),

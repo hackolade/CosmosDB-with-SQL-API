@@ -64,18 +64,6 @@ const updateIndexingPolicy = (indexes) => {
 	return result;
 };
 
-const getUniqueKeys = (uniqueKeys) => {
-	if (!uniqueKeys) {
-		return [];
-	}
-
-	return uniqueKeys.filter(uniqueKey => uniqueKey.attributePath && Array.isArray(uniqueKey.attributePath) && uniqueKey.attributePath.length).map((uniqueKey) => {
-		return {
-			paths: uniqueKey.attributePath.map(path => '/' + path.name.split('.').slice(1).join('/')).filter(Boolean)
-		};
-	}).filter(path => path.paths.length);
-};
-
 module.exports = {
 	testConnection: reApi.testConnection,
 	async applyToInstance(connectionInfo, logger, callback, app) {
@@ -109,8 +97,8 @@ module.exports = {
 				id: containerId,
 				partitionKey: script.partitionKey,
 				defaultTtl: helper.getTTL(containerData),
+				...(script.uniqueKeyPolicy && { uniqueKeyPolicy: script.uniqueKeyPolicy }),
 				...helper.getContainerThroughputProps(containerData),
-				
 			});
 
 			progress('Add sample documents ...');
@@ -127,8 +115,7 @@ module.exports = {
 			progress('Update indexing policy ...');
 
 			await container.replace({
-				id: containerId,
-				partitionKey: containerDef.partitionKey,
+				...containerDef,
 				indexingPolicy: updateIndexingPolicy(script.indexingPolicy),
 			});
 
