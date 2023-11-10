@@ -1,4 +1,4 @@
-const { wrapInSingleQuotes, getEscapeFunction } = require('./escapeShellSpecialCharacters');
+const { wrapInSingleQuotes, escapeShellCommand } = require('./escapeShellSpecialCharacters');
 const applyToInstanceHelper = require('../../applyToInstance/applyToInstanceHelper');
 const { getUniqueKeyPolicyScript } = require('../getUniqueKeyPolicyScript');
 const { getCliParamsDelimiter } = require('./getCliParamsDelimiter');
@@ -18,7 +18,7 @@ const buildAzureCLIScript =
 	_ =>
 	({ modelData, containerData, shellName }) => {
 		const cliParamsDelimiter = getCliParamsDelimiter(shellName);
-		const escapeAndWrapInQuotes = string => wrapInSingleQuotes(getEscapeFunction(shellName)(string));
+		const escapeAndWrapInQuotes = string => wrapInSingleQuotes(escapeShellCommand(shellName, string));
 
 		const accountName = escapeAndWrapInQuotes(modelData[0]?.accountName || '');
 		const dbName = escapeAndWrapInQuotes(containerData[0]?.dbId || '');

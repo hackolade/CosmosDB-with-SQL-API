@@ -1,32 +1,38 @@
-const getEscapeFunction = shell => {
+/**
+ * @param {"bash" | "zsh" | "powershell"} shell
+ * @param {string} command
+ * @return {string}
+ */
+const escapeShellCommand = (shell, command) => {
 	switch (shell) {
 		case 'powershell':
-			return string => {
-				string = string
-					.replace(/[\u009B\u001B\u0008\0]/gu, '')
-					.replace(/\r(?!\n)/gu, '')
-					.replace(/(['‛‘’‚])/gu, '$1$1');
+			command = command
+				.replace(/[\u009B\u001B\u0008\0]/gu, '')
+				.replace(/\r(?!\n)/gu, '')
+				.replace(/(['‛‘’‚])/gu, '$1$1');
 
-				if (/[\u0085\s]/u.test(string)) {
-					string = string.replace(/(?<!\\)(\\*)"/gu, '$1$1""').replace(/(?<!\\)(\\+)$/gu, '$1$1');
-				} else {
-					string = string.replace(/(?<!\\)(\\*)"/gu, '$1$1\\"');
-				}
-				return string;
-			};
+			if (/[\u0085\s]/u.test(command)) {
+				command = command.replace(/(?<!\\)(\\*)"/gu, '$1$1""').replace(/(?<!\\)(\\+)$/gu, '$1$1');
+			} else {
+				command = command.replace(/(?<!\\)(\\*)"/gu, '$1$1\\"');
+			}
+			return command;
 		case 'bash':
 		case 'zsh':
-			return string => {
-				return string
-					.replace(/[\0\u0008\u001B\u009B]/gu, '')
-					.replace(/\r(?!\n)/gu, '')
-					.replace(/'/gu, "'\\''");
-			};
+			return command
+				.replace(/[\0\u0008\u001B\u009B]/gu, '')
+				.replace(/\r(?!\n)/gu, '')
+				.replace(/'/gu, "'\\''");
+
 		default:
-			return string => string;
+			return command;
 	}
 };
 
-const wrapInSingleQuotes = string => `'${string}'`;
+/**
+ * @param {string} command
+ * @return {string}
+ */
+const wrapInSingleQuotes = command => `'${command}'`;
 
-module.exports = { getEscapeFunction, wrapInSingleQuotes };
+module.exports = { escapeShellCommand, wrapInSingleQuotes };
