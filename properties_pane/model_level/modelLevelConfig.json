@@ -166,6 +166,12 @@ making sure that you maintain a proper JSON format.
 				"propertyType": "text"
 			},
 			{
+				"propertyName": "Account name",
+				"propertyKeyword": "accountName",
+				"propertyTooltip": "Azure CosmosDB account name",
+				"propertyType": "text"
+			},
+			{
 				"propertyName": "Resource group",
 				"propertyKeyword": "resGrp",
 				"propertyTooltip": "Resource Group",

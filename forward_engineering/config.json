@@ -8,17 +8,69 @@
 		"container": true,
 		"view": false
 	},
-	"additionalOptions": [{
-		"id": "INCLUDE_SAMPLES",
-		"value": true,
-		"name": "Include sample data",
-		"align": "right",
-		"level": {
-			"entity": false
+	"additionalOptions": [
+		{
+			"id": "INCLUDE_SAMPLES",
+			"value": true,
+			"name": "Include sample data",
+			"align": "right",
+			"level": {
+				"entity": false
+			},
+			"targetFEKeywords": [
+				"containerSettingsJson"
+			]
 		}
-	}],
+	],
+	"options": [
+		{
+			"name": "Container settings JSON",
+			"keyword": "containerSettingsJson",
+			"fileExtensions": [
+				{
+					"label": "application/json",
+					"value": "json"
+				}
+			]
+		},
+		{
+			"name": "Azure CLI script (Windows PowerShell)",
+			"keyword": "azureCliPowerShell",
+			"disableApplyScriptToInstance": true,
+			"fileExtensions": [
+				{
+					"label": "application/txt",
+					"value": "txt"
+				}
+			]
+		},
+		{
+			"name": "Azure CLI script (zsh)",
+			"keyword": "azureCliZsh",
+			"disableApplyScriptToInstance": true,
+			"fileExtensions": [
+				{
+					"label": "application/txt",
+					"value": "txt"
+				}
+			]
+		},
+		{
+			"name": "Azure CLI script (bash)",
+			"keyword": "azureCliBash",
+			"disableApplyScriptToInstance": true,
+			"fileExtensions": [
+				{
+					"label": "application/txt",
+					"value": "txt"
+				}
+			]
+		}
+	],
 	"splitView": {
-		"byAdditionalOptions": ["INCLUDE_SAMPLES"]
+		"byAdditionalOptions": [
+			"INCLUDE_SAMPLES"
+		]
 	},
 	"applyScriptToInstance": true,
 	"refresh": true
