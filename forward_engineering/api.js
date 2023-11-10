@@ -1,38 +1,55 @@
-const applyToInstanceHelper = require('./applyToInstance');
+const applyToInstanceHelper = require('./applyToInstance/applyToInstanceHelper');
 const getIndexPolicyScript = require('./helpers/getIndexPolicyScript');
-const { PARTITION_KEY_DEFINITION_VERSION, PARTITION_KEY_KIND } = require('../shared/constants');
 const { getUniqueKeyPolicyScript } = require('./helpers/getUniqueKeyPolicyScript');
+const { buildAzureCLIScript } = require('./helpers/azureCLIScriptHelpers/buildAzureCLIScript');
+const getPartitionKey = require('./helpers/getPartitionKey');
 
 module.exports = {
 	generateContainerScript(data, logger, callback, app) {
 		try {
 			const _ = app.require('lodash');
-			const insertSamplesOption = _.get(data, 'options.additionalOptions', []).find(option => option.id === 'INCLUDE_SAMPLES') || {};
+			const insertSamplesOption =
+				_.get(data, 'options.additionalOptions', []).find(option => option.id === 'INCLUDE_SAMPLES') || {};
 			const withSamples = data.options.origin !== 'ui';
-			const samples = data.entities.map(entityId => updateSample(
-				JSON.parse(data.jsonData[entityId]),
-				data.containerData[0],
-				(data.entityData[entityId] || [])[0] || {},
-			));
-			const uniqueKeys = _.get(data.containerData, '[0].uniqueKey', []);
-			const scriptData = {
-				partitionKey: getPartitionKey(_)(data.containerData),
-				...(uniqueKeys.length && getUniqueKeyPolicyScript(uniqueKeys)),
-				indexingPolicy: getIndexPolicyScript(_)(data.containerData),
-				...(withSamples && { sample: samples }),
-				...addItems(_)(data.containerData),
-			};
-			const script = JSON.stringify(scriptData, null, 2);
+			const samples = data.entities.map(entityId =>
+				updateSample(
+					JSON.parse(data.jsonData[entityId]),
+					data.containerData[0],
+					(data.entityData[entityId] || [])[0] || {},
+				),
+			);
+			if (data.options.targetScriptOptions && data.options.targetScriptOptions.keyword === 'containerSettingsJson') {
+				const uniqueKeys = _.get(data.containerData, '[0].uniqueKey', []);
+				const scriptData = {
+					partitionKey: getPartitionKey(_)(data.containerData),
+					...(uniqueKeys.length && getUniqueKeyPolicyScript(uniqueKeys)),
+					indexingPolicy: getIndexPolicyScript(_)(data.containerData),
+					...(withSamples && { sample: samples }),
+					...addItems(_)(data.containerData),
+				};
+				const script = JSON.stringify(scriptData, null, 2);
+				if (withSamples || !insertSamplesOption.value) {
+					return callback(null, script);
+				}
+
+				return callback(null, [
+					{ title: 'CosmosDB script', script },
+					{ title: 'Sample data', script: JSON.stringify(samples, null, 2) },
+				]);
+			}
+
+			const script = buildAzureCLIScript(_)({
+				...data,
+				shellName: data.options.targetScriptOptions.keyword.split('azureCli')[1].toLowerCase(),
+			});
+
 			if (withSamples || !insertSamplesOption.value) {
 				return callback(null, script);
 			}
 
 			return callback(null, [
-				{ title: 'CosmosDB script', script },
-				{
-					title: 'Sample data',
-					script: JSON.stringify(samples, null, 2),
-				},
+				{ title: 'Azure CLI script', script },
+				{ title: 'Sample data', script: JSON.stringify(samples, null, 2) },
 			]);
 		} catch (e) {
 			const error = { message: e.message, stack: e.stack };
@@ -43,14 +60,13 @@ module.exports = {
 	generateScript(data, logger, callback, app) {
 		try {
 			const _ = app.require('lodash');
+			const uniqueKeys = _.get(data.containerData, '[0].uniqueKey', []);
+
 			const script = {
 				partitionKey: getPartitionKey(_)(data.containerData),
 				indexingPolicy: getIndexPolicyScript(_)(data.containerData),
-				sample: updateSample(
-					JSON.parse(data.jsonData),
-					data.containerData[0],
-					data.entityData[0],
-				),
+				...(uniqueKeys.length && getUniqueKeyPolicyScript(uniqueKeys)),
+				sample: updateSample(JSON.parse(data.jsonData), data.containerData[0], data.entityData[0]),
 				...addItems(_)(data.containerData),
 			};
 			return callback(null, JSON.stringify(script, null, 2));
@@ -78,23 +94,7 @@ const updateSample = (sample, containerData, entityData) => {
 	};
 };
 
-const getPartitionKey = (_) => (containerData) => {
-	const fixNamePath = (key) => (key?.name || '').trim().replace(/\/$/, '');
-	const partitionKeys = _.get(containerData, '[0].partitionKey', []);
-	const isHierarchical = _.get(containerData, '[0].hierarchicalPartitionKey', false);
-
-	if (!isHierarchical) {
-		return fixNamePath(partitionKeys[0]);
-	}
-
-	return {
-		paths: partitionKeys.map(fixNamePath),
-		version: PARTITION_KEY_DEFINITION_VERSION.v2,
-		kind: PARTITION_KEY_KIND.MultiHash,
-	};
-};
-
-const add = (key, items, mapper) => (script) => {
+const add = (key, items, mapper) => script => {
 	if (!items.length) {
 		return script;
 	}
@@ -105,7 +105,7 @@ const add = (key, items, mapper) => (script) => {
 	};
 };
 
-const addItems = (_) => (containerData) => {
+const addItems = _ => containerData => {
 	return _.flow(
 		add('Stored Procedures', _.get(containerData, '[2].storedProcs', []), mapStoredProcs),
 		add('User Defined Functions', _.get(containerData, '[4].udfs', []), mapUDFs),
@@ -113,7 +113,7 @@ const addItems = (_) => (containerData) => {
 	)();
 };
 
-const mapUDFs = (udfs) => {
+const mapUDFs = udfs => {
 	return udfs.map(udf => {
 		return {
 			id: udf.udfID,
@@ -122,18 +122,18 @@ const mapUDFs = (udfs) => {
 	});
 };
 
-const mapTriggers = (triggers) => {
+const mapTriggers = triggers => {
 	return triggers.map(trigger => {
 		return {
 			id: trigger.triggerID,
 			body: trigger.triggerFunction,
 			triggerOperation: trigger.triggerOperation,
-			triggerType: trigger.prePostTrigger === 'Pre-Trigger' ? 'Pre' : 'Post'
+			triggerType: trigger.prePostTrigger === 'Pre-Trigger' ? 'Pre' : 'Post',
 		};
 	});
 };
 
-const mapStoredProcs = (storedProcs) => {
+const mapStoredProcs = storedProcs => {
 	return storedProcs.map(proc => {
 		return {
 			id: proc.storedProcID,
