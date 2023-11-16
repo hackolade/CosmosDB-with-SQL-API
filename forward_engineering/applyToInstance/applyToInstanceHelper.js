@@ -59,11 +59,11 @@ const applyToInstanceHelper = (_) => ({
 	},
 
 	getTTL(containerData) {
-		switch (containerData.TTL) {
+		switch (containerData?.TTL) {
 			case TTL_ON_DEFAULT:
 				return -1;
 			case TTL_ON:
-				return _.parseInt(containerData.TTLseconds) || -1;
+				return _.parseInt(containerData?.TTLseconds) || -1;
 			case TTL_OFF:
 			default:
 				return 0;
@@ -71,13 +71,13 @@ const applyToInstanceHelper = (_) => ({
 	},
 
 	getContainerThroughputProps(containerData) {
-		if (containerData.capacityMode === "Serverless") {
+		if (containerData?.capacityMode === "Serverless") {
 			return {};
 		}
-		if (containerData.autopilot) {
+		if (containerData?.autopilot) {
 			return { maxThroughput: containerData.throughput || 4000 };
 		}
-		return { throughput: containerData.throughput || 400 };
+		return { throughput: containerData?.throughput || 400 };
 	}
 });
 
