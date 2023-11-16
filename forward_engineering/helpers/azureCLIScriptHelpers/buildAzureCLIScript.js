@@ -64,7 +64,8 @@ const getAzureCliContainerCreateStatement =
 			JSON.stringify(getIndexPolicyScript(_)(containerData)),
 		)}`;
 		const uniqueKeysPolicyParam = getUniqueKeysPolicyParam(containerData[0], escapeAndWrapInQuotes);
-		const ttlParam = `--ttl ${helper.getTTL(containerData[0])}`;
+		const ttl = helper.getTTL(containerData[0]);
+		const ttlParam = ttl !== 0 ? `--ttl ${helper.getTTL(containerData[0])}` : '';
 
 		const cliStatement = `${CLI} ${CONTAINER} ${CREATE}`;
 		const requiredParams = [

@@ -65,9 +65,8 @@ const applyToInstanceHelper = (_) => ({
 			case TTL_ON:
 				return _.parseInt(containerData.TTLseconds) || -1;
 			case TTL_OFF:
-				return ''
 			default:
-				return -1;
+				return 0;
 		}
 	},
 
