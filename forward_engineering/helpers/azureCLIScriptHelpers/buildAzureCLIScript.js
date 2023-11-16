@@ -59,7 +59,7 @@ const getAzureCliContainerCreateStatement =
 		const helper = applyToInstanceHelper(_);
 
 		const partitionKeyParams = getPartitionKeyParams(_)(containerData);
-		const throughputParam = getThroughputParam(helper.getContainerThroughputProps(containerData));
+		const throughputParam = getThroughputParam(helper.getContainerThroughputProps(containerData[0]));
 		const indexingPolicyParam = `--idx ${escapeAndWrapInQuotes(
 			JSON.stringify(getIndexPolicyScript(_)(containerData)),
 		)}`;

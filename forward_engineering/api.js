@@ -1,4 +1,4 @@
-const applyToInstanceHelper = require('./applyToInstance/applyToInstanceHelper');
+const applyToInstanceHelper = require('./applyToInstance');
 const getIndexPolicyScript = require('./helpers/getIndexPolicyScript');
 const { getUniqueKeyPolicyScript } = require('./helpers/getUniqueKeyPolicyScript');
 const { buildAzureCLIScript } = require('./helpers/azureCLIScriptHelpers/buildAzureCLIScript');
