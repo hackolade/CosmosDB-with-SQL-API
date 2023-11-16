@@ -1,5 +1,6 @@
 const { StoredProcedure, UserDefinedFunction, Trigger } = require('../../reverse_engineering/node_modules/@azure/cosmos');
 const setUpDocumentClient = require('../../reverse_engineering/helpers/setUpDocumentClient');
+const { TTL_ON_DEFAULT, TTL_ON, TTL_OFF } = require('../../shared/constants');
 
 const applyToInstanceHelper = (_) => ({
 	setUpDocumentClient(connectionInfo) {
@@ -59,12 +60,13 @@ const applyToInstanceHelper = (_) => ({
 
 	getTTL(containerData) {
 		switch (containerData.TTL) {
-			case 'On (no default)':
+			case TTL_ON_DEFAULT:
 				return -1;
-			case 'On':
-				return _.parseInt(TTLseconds) || 0;
+			case TTL_ON:
+				return _.parseInt(containerData.TTLseconds) || -1;
+			case TTL_OFF:
 			default:
-				return -1;
+				return 0;
 		}
 	},
 

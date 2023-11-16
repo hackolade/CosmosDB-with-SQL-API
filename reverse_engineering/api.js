@@ -5,6 +5,7 @@ const _ = require('lodash');
 const axios = require('axios');
 const qs = require('qs');
 const executeWithTimeout = require('./helpers/executeWithTimeout');
+const { TTL_ON_DEFAULT, TTL_ON, TTL_OFF } = require('../shared/constants');
 let client;
 
 module.exports = {
@@ -142,9 +143,11 @@ module.exports = {
 					accountID: data.accountKey,
 					defaultConsistency: accountInfo.consistencyPolicy,
 					preferredLocation: accountInfo.writableLocations[0] ? accountInfo.writableLocations[0].name : '',
-					tenant: data.tenantId,
-					resGrp: data.resourceGroupName,
-					subscription: data.subscriptionId,
+					...(includeAccountInformation && {
+						resGrp: data.resourceGroupName,
+						tenant: data.tenantId,
+						subscription: data.subscriptionId,
+					}),
 				},
 				additionalAccountInfo,
 			);
@@ -657,9 +660,9 @@ async function getUdfs(containerInstance) {
 
 function getTTL(defaultTTL) {
 	if (!defaultTTL) {
-		return 'Off';
+		return TTL_OFF;
 	}
-	return defaultTTL === -1 ? 'On (no default)' : 'On';
+	return defaultTTL === -1 ? TTL_ON_DEFAULT : TTL_ON;
 }
 
 function getSamplingInfo(recordSamplingSettings, fieldInference) {
@@ -773,7 +776,7 @@ function createSchemaByPartitionKeyPath(path, documents = []) {
 		};
 	};
 
-	const getProperties = (paths) => {
+	const getProperties = paths => {
 		return paths.reduce((result, path) => {
 			if (!path || !_.isString(path)) {
 				return result;
@@ -790,9 +793,9 @@ function createSchemaByPartitionKeyPath(path, documents = []) {
 
 			return {
 				...result,
-				...getNestedObject(namePath)
-			}
-		}, {})
+				...getNestedObject(namePath),
+			};
+		}, {});
 	};
 
 	if (!Array.isArray(path)) {

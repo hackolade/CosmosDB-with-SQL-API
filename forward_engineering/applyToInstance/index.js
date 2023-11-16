@@ -1,5 +1,6 @@
 const reApi = require('../../reverse_engineering/api');
 const executeWithTimeout = require('../../reverse_engineering/helpers/executeWithTimeout');
+const { TTL_ON, TTL_ON_DEFAULT } = require('../../shared/constants');
 const applyToInstanceHelper = require('./applyToInstanceHelper');
 
 const createOrUpdate = async (sample, container) => {
@@ -93,10 +94,11 @@ module.exports = {
 			
 			progress('Create container  if not exists ...');
 
+			const shouldIncludeTtl = [TTL_ON, TTL_ON_DEFAULT].includes(containerData.TTL);
 			const { container, resource: containerDef } = await database.containers.createIfNotExists({
 				id: containerId,
 				partitionKey: script.partitionKey,
-				defaultTtl: helper.getTTL(containerData),
+				...(shouldIncludeTtl && { defaultTtl: helper.getTTL(containerData) }),
 				...(script.uniqueKeyPolicy && { uniqueKeyPolicy: script.uniqueKeyPolicy }),
 				...helper.getContainerThroughputProps(containerData),
 			});
