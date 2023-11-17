@@ -143,7 +143,7 @@ module.exports = {
 					accountID: data.accountKey,
 					defaultConsistency: accountInfo.consistencyPolicy,
 					preferredLocation: accountInfo.writableLocations[0] ? accountInfo.writableLocations[0].name : '',
-					...(includeAccountInformation && {
+					...(data?.includeAccountInformation && {
 						resGrp: data.resourceGroupName,
 						tenant: data.tenantId,
 						subscription: data.subscriptionId,
