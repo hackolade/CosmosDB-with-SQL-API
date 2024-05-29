@@ -407,7 +407,10 @@ function getDocumentKindDataFromInfer(data, probability) {
 						continue;
 					}
 
-					if (inference[key]['%docs'] >= documentKind.probability && inference[key].samples.length < minCount) {
+					if (
+						inference[key]['%docs'] >= documentKind.probability &&
+						inference[key].samples.length < minCount
+					) {
 						minCount = inference[key].samples.length;
 						documentKind.probability = inference[key]['%docs'];
 						documentKind.key = key;
@@ -724,12 +727,14 @@ async function getAdditionalAccountInfo(connectionInfo, logger) {
 			),
 			ipRangeFilter: accountData.properties.ipRangeFilter,
 			tags: Object.entries(accountData.tags).map(([tagName, tagValue]) => ({ tagName, tagValue })),
-			locations: accountData.properties.locations.map(({ id, locationName, failoverPriority, isZoneRedundant }) => ({
-				locationId: id,
-				locationName,
-				failoverPriority,
-				isZoneRedundant,
-			})),
+			locations: accountData.properties.locations.map(
+				({ id, locationName, failoverPriority, isZoneRedundant }) => ({
+					locationId: id,
+					locationName,
+					failoverPriority,
+					isZoneRedundant,
+				}),
+			),
 		};
 	} catch (err) {
 		logger.log('error', { message: _.get(err, 'response.data.error.message', err.message), stack: err.stack });

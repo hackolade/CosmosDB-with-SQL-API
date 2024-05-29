@@ -55,7 +55,15 @@ const getAzureCliDbCreateStatement = ({ accountName, dbName, resourceGroup, cliP
 
 const getAzureCliContainerCreateStatement =
 	_ =>
-	({ containerData, accountName, dbName, resourceGroup, containerName, escapeAndWrapInQuotes, cliParamsDelimiter }) => {
+	({
+		containerData,
+		accountName,
+		dbName,
+		resourceGroup,
+		containerName,
+		escapeAndWrapInQuotes,
+		cliParamsDelimiter,
+	}) => {
 		const helper = applyToInstanceHelper(_);
 
 		const partitionKeyParams = getPartitionKeyParams(_)(containerData);

@@ -18,7 +18,10 @@ module.exports = {
 					(data.entityData[entityId] || [])[0] || {},
 				),
 			);
-			if (data.options.targetScriptOptions && data.options.targetScriptOptions.keyword === 'containerSettingsJson') {
+			if (
+				data.options.targetScriptOptions &&
+				data.options.targetScriptOptions.keyword === 'containerSettingsJson'
+			) {
 				const uniqueKeys = _.get(data.containerData, '[0].uniqueKey', []);
 				const scriptData = {
 					partitionKey: getPartitionKey(_)(data.containerData),

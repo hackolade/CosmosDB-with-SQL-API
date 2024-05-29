@@ -15,7 +15,7 @@ const createOrUpdate = async (sample, container) => {
 	}
 };
 
-const addDataType = (indexes) => {
+const addDataType = indexes => {
 	return indexes.map(index => {
 		if (!Array.isArray(index.indexes)) {
 			return index;
@@ -31,25 +31,20 @@ const addDataType = (indexes) => {
 	});
 };
 
-const addSpatialTypes = (spatialIndex) => {
+const addSpatialTypes = spatialIndex => {
 	if (Array.isArray(spatialIndex.types) && spatialIndex.types.length) {
 		return spatialIndex;
 	}
-	
+
 	return {
 		...spatialIndex,
-		types: [
-			"Point",
-			"LineString",
-			"Polygon",
-			"MultiPolygon"
-		]
+		types: ['Point', 'LineString', 'Polygon', 'MultiPolygon'],
 	};
 };
 
-const updateIndexingPolicy = (indexes) => {
-	const result = {...indexes};
-	
+const updateIndexingPolicy = indexes => {
+	const result = { ...indexes };
+
 	if (Array.isArray(result.includedPaths)) {
 		result.includedPaths = addDataType(result.includedPaths);
 	}
@@ -87,11 +82,11 @@ module.exports = {
 			}
 
 			const progress = createLogger(logger, databaseId, containerId);
-			
+
 			progress('Create database if not exists...');
 
 			const { database } = await executeWithTimeout(() => client.databases.createIfNotExists({ id: databaseId }));
-			
+
 			progress('Create container  if not exists ...');
 
 			const shouldIncludeTtl = [TTL_ON, TTL_ON_DEFAULT].includes(containerData.TTL);
@@ -108,10 +103,10 @@ module.exports = {
 			if (Array.isArray(script.sample)) {
 				await script.sample.reduce(async (next, sample) => {
 					await next;
-					return createOrUpdate(sample, container);  
+					return createOrUpdate(sample, container);
 				}, Promise.resolve());
 			} else {
-				await createOrUpdate(script.sample, container);  
+				await createOrUpdate(script.sample, container);
 			}
 
 			progress('Update indexing policy ...');
@@ -150,10 +145,10 @@ module.exports = {
 				stack: error.stack,
 			});
 		}
-	}
+	},
 };
 
-const createLogger = (logger, containerName, entityName) => (message) => {
+const createLogger = (logger, containerName, entityName) => message => {
 	logger.progress({ message, containerName, entityName });
 	logger.log('info', { message }, 'Applying to instance');
 };
@@ -162,13 +157,13 @@ const parseScript = script => {
 	try {
 		return JSON.parse(script);
 	} catch (err) {
-		const [ main, sample ] = script.split(/\n}\n\[/m);
+		const [main, sample] = script.split(/\n}\n\[/m);
 		const mainScript = JSON.parse(main + '}');
 		const sampleScript = JSON.parse('[' + sample);
 
 		return {
 			...mainScript,
-			sample: sampleScript
-		}
+			sample: sampleScript,
+		};
 	}
 };

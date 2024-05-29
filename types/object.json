@@ -4,7 +4,7 @@
 	"dtdAbbreviation": "{...}",
 	"parentType": "document",
 	"defaultValues": {
-		"type": "document", 
+		"type": "document",
 		"childType": "object",
 		"primaryKey": false,
 		"relationshipType": "",

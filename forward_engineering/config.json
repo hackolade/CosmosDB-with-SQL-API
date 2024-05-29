@@ -17,9 +17,7 @@
 			"level": {
 				"entity": false
 			},
-			"targetFEKeywords": [
-				"containerSettingsJson"
-			]
+			"targetFEKeywords": ["containerSettingsJson"]
 		}
 	],
 	"options": [
@@ -68,9 +66,7 @@
 		}
 	],
 	"splitView": {
-		"byAdditionalOptions": [
-			"INCLUDE_SAMPLES"
-		]
+		"byAdditionalOptions": ["INCLUDE_SAMPLES"]
 	},
 	"applyScriptToInstance": true,
 	"refresh": true
