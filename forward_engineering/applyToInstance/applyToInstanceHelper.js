@@ -1,8 +1,4 @@
-const {
-	StoredProcedure,
-	UserDefinedFunction,
-	Trigger,
-} = require('../../reverse_engineering/node_modules/@azure/cosmos');
+const { StoredProcedure, UserDefinedFunction, Trigger } = require('@azure/cosmos');
 const setUpDocumentClient = require('../../reverse_engineering/helpers/setUpDocumentClient');
 const { TTL_ON_DEFAULT, TTL_ON, TTL_OFF } = require('../../shared/constants');
 
