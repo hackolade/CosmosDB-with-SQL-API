@@ -211,7 +211,7 @@ module.exports = {
 					} else {
 						docKindsList.forEach(docKindItem => {
 							const newArrayDocuments = filteredDocuments.filter(item => {
-								return item[documentKindName] == docKindItem;
+								return item[documentKindName] === docKindItem;
 							});
 
 							const documentsPackage = {
@@ -303,7 +303,7 @@ async function listCollections(databaseId) {
 	return containers;
 }
 
-async function getDocuments(container, maxItemCount) {
+async function getDocuments(container, maxItemCount, logger) {
 	const query = `SELECT TOP ${maxItemCount} * FROM c`;
 	let documents = [];
 	try {
