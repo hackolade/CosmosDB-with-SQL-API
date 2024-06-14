@@ -5,11 +5,14 @@ const getUniqueKeys = uniqueKeys => {
 
 	return uniqueKeys
 		.filter(
-			uniqueKey => uniqueKey.attributePath && Array.isArray(uniqueKey.attributePath) && uniqueKey.attributePath.length,
+			uniqueKey =>
+				uniqueKey.attributePath && Array.isArray(uniqueKey.attributePath) && uniqueKey.attributePath.length,
 		)
 		.map(uniqueKey => {
 			return {
-				paths: uniqueKey.attributePath.map(path => '/' + path.name.split('.').slice(1).join('/')).filter(Boolean),
+				paths: uniqueKey.attributePath
+					.map(path => '/' + path.name.split('.').slice(1).join('/'))
+					.filter(Boolean),
 			};
 		})
 		.filter(path => path.paths.length);

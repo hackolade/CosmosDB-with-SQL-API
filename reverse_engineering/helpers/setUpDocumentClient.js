@@ -14,10 +14,10 @@ function setUpDocumentClient(connectionInfo) {
 	const endpoint = getEndpoint(connectionInfo);
 	const key = connectionInfo.accountKey;
 	const connectionPolicy = {
-		requestTimeout: 30000
+		requestTimeout: 30000,
 	};
-	if ((connectionInfo.disableSSL)) {
-		process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
+	if (connectionInfo.disableSSL) {
+		process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
 	}
 	return new CosmosClient({ endpoint, key, connectionPolicy });
 }
