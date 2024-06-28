@@ -162,10 +162,12 @@ making sure that you maintain a proper JSON format.
 				"propertyType": "text",
 				"arrayItemDisabled": true,
 				"enableForReference": true,
-				"disabledOnCondition": [{
+				"disabledOnCondition": [
+					{
 						"key": "key",
 						"value": true
-					}, {
+					},
+					{
 						"key": "documentKind",
 						"value": true
 					}
@@ -286,13 +288,6 @@ making sure that you maintain a proper JSON format.
 			"additionalItems",
 			"comments"
 		],
-		"null": [
-			"name",
-			"code",
-			"schemaId",
-			"description",
-			"type",
-			"comments"
-		]
+		"null": ["name", "code", "schemaId", "description", "type", "comments"]
 	}
 }

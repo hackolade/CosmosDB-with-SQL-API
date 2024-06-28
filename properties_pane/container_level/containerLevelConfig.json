@@ -128,33 +128,32 @@ making sure that you maintain a proper JSON format.
 [
 	{
 		"lowerTab": "Details",
-		"containerLevelKeys": [{
-			"labelName": "Item key",
-			"propertyName": "Item key",
-			"propertyKeyword": "id",
-			"defaultName": "id",
-			"propertyPrimaryKey": true,
-			"propertyType": "text",
-			"typeName": "Data type",
-			"typeOptions": ["string"],
-			"defaultType": "string",
-			"disabledFieldOption": true
-		},{
-			"labelName": "Item type",
-			"propertyName": "Item type field name",
-			"propertyKeyword": "docType",
-			"defaultName": "type",
-			"propertyPrimaryKey": true,
-			"propertyType": "text",
-			"typeName": "Data type",
-			"typeOptions": [
-				"string",
-				"number",
-				"boolean"
-			],
-			"defaultType": "string",
-			"disabledFieldOption": false
-		}],
+		"containerLevelKeys": [
+			{
+				"labelName": "Item key",
+				"propertyName": "Item key",
+				"propertyKeyword": "id",
+				"defaultName": "id",
+				"propertyPrimaryKey": true,
+				"propertyType": "text",
+				"typeName": "Data type",
+				"typeOptions": ["string"],
+				"defaultType": "string",
+				"disabledFieldOption": true
+			},
+			{
+				"labelName": "Item type",
+				"propertyName": "Item type field name",
+				"propertyKeyword": "docType",
+				"defaultName": "type",
+				"propertyPrimaryKey": true,
+				"propertyType": "text",
+				"typeName": "Data type",
+				"typeOptions": ["string", "number", "boolean"],
+				"defaultType": "string",
+				"disabledFieldOption": false
+			}
+		],
 		"structure": [
 			{
 				"propertyName": "Hierarchical partition key",
@@ -192,22 +191,26 @@ making sure that you maintain a proper JSON format.
 				},
 				"dependency": {
 					"type": "not",
-					"values": [{
-						"key": "hierarchicalPartitionKey",
-						"value": true
-					}]
+					"values": [
+						{
+							"key": "hierarchicalPartitionKey",
+							"value": true
+						}
+					]
 				}
 			},
 			{
 				"propertyName": "Unique keys",
 				"propertyKeyword": "uniqueKey",
 				"propertyType": "group",
-				"structure": [{
-					"propertyName": "Attribute path",
-					"propertyKeyword": "attributePath",
-					"propertyType": "fieldList",
-					"template": "orderedList"
-				}]
+				"structure": [
+					{
+						"propertyName": "Attribute path",
+						"propertyKeyword": "attributePath",
+						"propertyType": "fieldList",
+						"template": "orderedList"
+					}
+				]
 			},
 			{
 				"propertyName": "Description",
@@ -231,10 +234,7 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "capacityMode",
 				"propertyTooltip": "Choose the capacity mode",
 				"propertyType": "select",
-				"options": [
-					"Provisioned throughput",
-					"Serverless"
-				]
+				"options": ["Provisioned throughput", "Serverless"]
 			},
 			{
 				"propertyName": "Autoscale",
@@ -296,11 +296,7 @@ making sure that you maintain a proper JSON format.
 				"propertyKeyword": "TTL",
 				"propertyTooltip": "Time to live",
 				"propertyType": "select",
-				"options": [
-					"Off",
-					"On (no default)",
-					"On"
-				]
+				"options": ["Off", "On (no default)", "On"]
 			},
 			{
 				"propertyName": "TTL default seconds",
@@ -328,10 +324,7 @@ making sure that you maintain a proper JSON format.
 				"shouldValidate": false,
 				"propertyTooltip": "Indexing mode: consistent, lazy, or none",
 				"propertyType": "select",
-				"options": [
-					"Consistent",
-					"None"
-				]
+				"options": ["Consistent", "None"]
 			},
 			{
 				"propertyName": "Automatic",
@@ -339,10 +332,7 @@ making sure that you maintain a proper JSON format.
 				"shouldValidate": false,
 				"propertyTooltip": "Automatic indexing: true or false",
 				"propertyType": "select",
-				"options": [
-					"true",
-					"false"
-				]
+				"options": ["true", "false"]
 			},
 			{
 				"propertyName": "Included paths",
@@ -510,17 +500,14 @@ making sure that you maintain a proper JSON format.
 						"shouldValidate": false,
 						"propertyTooltip": "Data type: String, Number, Point, Polygon, or LineString",
 						"propertyType": "group",
-						"structure": [{
-							"propertyName": "Type",
-							"propertyKeyword": "spatialType",
-							"propertyType": "select",
-							"options": [
-								"Point",
-								"Polygon",
-								"MultiPolygon",
-								"LineString"
-							]
-						}]
+						"structure": [
+							{
+								"propertyName": "Type",
+								"propertyKeyword": "spatialType",
+								"propertyType": "select",
+								"options": ["Point", "Polygon", "MultiPolygon", "LineString"]
+							}
+						]
 					},
 					{
 						"propertyName": "Description",
@@ -530,7 +517,7 @@ making sure that you maintain a proper JSON format.
 						"propertyType": "details",
 						"template": "textarea"
 					},
-					
+
 					{
 						"propertyName": "Comments",
 						"propertyKeyword": "indexComments",
@@ -573,10 +560,7 @@ making sure that you maintain a proper JSON format.
 							"divider": "/",
 							"front": true
 						},
-						"attributeList": [
-							"ascending",
-							"descending"
-						]
+						"attributeList": ["ascending", "descending"]
 					},
 					{
 						"propertyName": "Description",
@@ -600,180 +584,177 @@ making sure that you maintain a proper JSON format.
 	},
 	{
 		"lowerTab": "Stored Procs",
-		"structure": [{
-			"propertyName": "Stored Procs",
-			"propertyType": "group",
-			"propertyKeyword": "storedProcs",
-			"shouldValidate": false,
-			"propertyTooltip": "",
-			"structure": [
-				{
-					"propertyName": "Name",
-					"propertyKeyword": "name",
-					"shouldValidate": false,
-					"propertyTooltip": "",
-					"propertyType": "text"
-				},
-				{
-					"propertyName": "Id",
-					"propertyKeyword": "storedProcID",
-					"shouldValidate": false,
-					"propertyTooltip": "Stored procedure unique name",
-					"propertyType": "text"
-				},
-				{
-					"propertyName": "Description",
-					"propertyKeyword": "storedProcDescription",
-					"shouldValidate": false,
-					"propertyTooltip": "description",
-					"propertyType": "details",
-					"template": "textarea"
-				},
-				{
-					"propertyName": "Function",
-					"propertyKeyword": "storedProcFunction",
-					"shouldValidate": false,
-					"propertyTooltip": "description",
-					"propertyType": "details",
-					"template": "textarea",
-					"markdown": false
-				},
-				{
-					"propertyName": "Comments",
-					"propertyKeyword": "storedProcComments",
-					"shouldValidate": false,
-					"propertyTooltip": "comments",
-					"propertyType": "details",
-					"template": "textarea"
-				}
-			]
-		}]
+		"structure": [
+			{
+				"propertyName": "Stored Procs",
+				"propertyType": "group",
+				"propertyKeyword": "storedProcs",
+				"shouldValidate": false,
+				"propertyTooltip": "",
+				"structure": [
+					{
+						"propertyName": "Name",
+						"propertyKeyword": "name",
+						"shouldValidate": false,
+						"propertyTooltip": "",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Id",
+						"propertyKeyword": "storedProcID",
+						"shouldValidate": false,
+						"propertyTooltip": "Stored procedure unique name",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Description",
+						"propertyKeyword": "storedProcDescription",
+						"shouldValidate": false,
+						"propertyTooltip": "description",
+						"propertyType": "details",
+						"template": "textarea"
+					},
+					{
+						"propertyName": "Function",
+						"propertyKeyword": "storedProcFunction",
+						"shouldValidate": false,
+						"propertyTooltip": "description",
+						"propertyType": "details",
+						"template": "textarea",
+						"markdown": false
+					},
+					{
+						"propertyName": "Comments",
+						"propertyKeyword": "storedProcComments",
+						"shouldValidate": false,
+						"propertyTooltip": "comments",
+						"propertyType": "details",
+						"template": "textarea"
+					}
+				]
+			}
+		]
 	},
 	{
 		"lowerTab": "Triggers",
-		"structure": [{
-			"propertyName": "Triggers",
-			"propertyType": "group",
-			"propertyKeyword": "triggers",
-			"shouldValidate": false,
-			"propertyTooltip": "",
-			"structure": [
-				{
-					"propertyName": "Name",
-					"propertyKeyword": "name",
-					"shouldValidate": false,
-					"propertyTooltip": "",
-					"propertyType": "text"
-				},
-				{
-					"propertyName": "Id",
-					"propertyKeyword": "triggerID",
-					"shouldValidate": false,
-					"propertyTooltip": "Stored procedure unique name",
-					"propertyType": "text"
-				},
-				{
-					"propertyName": "Description",
-					"propertyKeyword": "triggerDescription",
-					"shouldValidate": false,
-					"propertyTooltip": "description",
-					"propertyType": "details",
-					"template": "textarea"
-				},
-				{
-					"propertyName": "Pre/Post",
-					"propertyKeyword": "prePostTrigger",
-					"shouldValidate": false,
-					"propertyTooltip": "Choose whether pre- or post-trigger",
-					"propertyType": "select",
-					"options": [
-						"Pre-Trigger",
-						"Post-Trigger"
-					]
-				},
-				{
-					"propertyName": "Operation",
-					"propertyKeyword": "triggerOperation",
-					"shouldValidate": false,
-					"propertyTooltip": "Choose operation",
-					"propertyType": "select",
-					"options": [
-						"All",
-						"Create",
-						"Delete",
-						"Replace",
-						"Update"
-					]
-				},
-				{
-					"propertyName": "Function",
-					"propertyKeyword": "triggerFunction",
-					"shouldValidate": false,
-					"propertyTooltip": "description",
-					"propertyType": "details",
-					"template": "textarea",
-					"markdown": false
-				},
-				{
-					"propertyName": "Comments",
-					"propertyKeyword": "triggerComments",
-					"shouldValidate": false,
-					"propertyTooltip": "comments",
-					"propertyType": "details",
-					"template": "textarea"
-				}
-			]
-		}]
+		"structure": [
+			{
+				"propertyName": "Triggers",
+				"propertyType": "group",
+				"propertyKeyword": "triggers",
+				"shouldValidate": false,
+				"propertyTooltip": "",
+				"structure": [
+					{
+						"propertyName": "Name",
+						"propertyKeyword": "name",
+						"shouldValidate": false,
+						"propertyTooltip": "",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Id",
+						"propertyKeyword": "triggerID",
+						"shouldValidate": false,
+						"propertyTooltip": "Stored procedure unique name",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Description",
+						"propertyKeyword": "triggerDescription",
+						"shouldValidate": false,
+						"propertyTooltip": "description",
+						"propertyType": "details",
+						"template": "textarea"
+					},
+					{
+						"propertyName": "Pre/Post",
+						"propertyKeyword": "prePostTrigger",
+						"shouldValidate": false,
+						"propertyTooltip": "Choose whether pre- or post-trigger",
+						"propertyType": "select",
+						"options": ["Pre-Trigger", "Post-Trigger"]
+					},
+					{
+						"propertyName": "Operation",
+						"propertyKeyword": "triggerOperation",
+						"shouldValidate": false,
+						"propertyTooltip": "Choose operation",
+						"propertyType": "select",
+						"options": ["All", "Create", "Delete", "Replace", "Update"]
+					},
+					{
+						"propertyName": "Function",
+						"propertyKeyword": "triggerFunction",
+						"shouldValidate": false,
+						"propertyTooltip": "description",
+						"propertyType": "details",
+						"template": "textarea",
+						"markdown": false
+					},
+					{
+						"propertyName": "Comments",
+						"propertyKeyword": "triggerComments",
+						"shouldValidate": false,
+						"propertyTooltip": "comments",
+						"propertyType": "details",
+						"template": "textarea"
+					}
+				]
+			}
+		]
 	},
 	{
 		"lowerTab": "UDFs",
-		"structure": [{
-			"propertyName": "UDFs",
-			"propertyType": "group",
-			"propertyKeyword": "udfs",
-			"shouldValidate": false,
-			"propertyTooltip": "",
-			"structure": [
-				{
-					"propertyName": "Name",
-					"propertyKeyword": "name",
-					"shouldValidate": false,
-					"propertyTooltip": "",
-					"propertyType": "text"
-				},
-				{
-					"propertyName": "Id",
-					"propertyKeyword": "udfID",
-					"shouldValidate": false,
-					"propertyTooltip": "Stored procedure unique name",
-					"propertyType": "text"
-				},
-				{
-					"propertyName": "Description",
-					"propertyKeyword": "udfDescription",
-					"shouldValidate": false,
-					"propertyTooltip": "description",
-					"propertyType": "details",
-					"template": "textarea"
-				},
-				{
-					"propertyName": "Function",
-					"propertyKeyword": "udfFunction",
-					"shouldValidate": false,
-					"propertyTooltip": "description",
-					"propertyType": "details",
-					"template": "textarea",
-					"markdown": false
-				},
-				{
-					"propertyName": "Comments",
-					"propertyKeyword": "udfComments",
-					"shouldValidate": false,
-					"propertyTooltip": "comments",
-					"propertyType": "details",
-					"template": "textarea"
-				}
-			]
-		}]
+		"structure": [
+			{
+				"propertyName": "UDFs",
+				"propertyType": "group",
+				"propertyKeyword": "udfs",
+				"shouldValidate": false,
+				"propertyTooltip": "",
+				"structure": [
+					{
+						"propertyName": "Name",
+						"propertyKeyword": "name",
+						"shouldValidate": false,
+						"propertyTooltip": "",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Id",
+						"propertyKeyword": "udfID",
+						"shouldValidate": false,
+						"propertyTooltip": "Stored procedure unique name",
+						"propertyType": "text"
+					},
+					{
+						"propertyName": "Description",
+						"propertyKeyword": "udfDescription",
+						"shouldValidate": false,
+						"propertyTooltip": "description",
+						"propertyType": "details",
+						"template": "textarea"
+					},
+					{
+						"propertyName": "Function",
+						"propertyKeyword": "udfFunction",
+						"shouldValidate": false,
+						"propertyTooltip": "description",
+						"propertyType": "details",
+						"template": "textarea",
+						"markdown": false
+					},
+					{
+						"propertyName": "Comments",
+						"propertyKeyword": "udfComments",
+						"shouldValidate": false,
+						"propertyTooltip": "comments",
+						"propertyType": "details",
+						"template": "textarea"
+					}
+				]
+			}
+		]
 	}
 ]
