@@ -7,11 +7,11 @@ const escapeShellCommand = (shell, command) => {
 	switch (shell) {
 		case 'powershell':
 			command = command
-				.replace(/[\u009B\u001B\u0008\0]/gu, '')
+				.replace(/[\u009B\u001B\u0008\0]/gu, '') // NOSONAR
 				.replace(/\r(?!\n)/gu, '')
 				.replace(/(['‛‘’‚])/gu, '$1$1');
 
-			if (/[\u0085\s]/u.test(command)) {
+			if (/[\u0085\s]/u.test(command)) { // NOSONAR
 				command = command.replace(/(?<!\\)(\\*)"/gu, '$1$1""').replace(/(?<!\\)(\\+)$/gu, '$1$1');
 			} else {
 				command = command.replace(/(?<!\\)(\\*)"/gu, '$1$1\\"');
@@ -20,7 +20,7 @@ const escapeShellCommand = (shell, command) => {
 		case 'bash':
 		case 'zsh':
 			return command
-				.replace(/[\0\u0008\u001B\u009B]/gu, '')
+				.replace(/[\0\u0008\u001B\u009B]/gu, '') // NOSONAR
 				.replace(/\r(?!\n)/gu, '')
 				.replace(/'/gu, "'\\''");
 

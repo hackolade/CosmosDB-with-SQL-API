@@ -138,8 +138,7 @@ module.exports = {
 
 			const { resource: accountInfo } = await client.getDatabaseAccount();
 			const additionalAccountInfo = await getAdditionalAccountInfo(data, logger);
-			const modelInfo = Object.assign(
-				{
+			const modelInfo = {
 					accountID: data.accountKey,
 					defaultConsistency: accountInfo.consistencyPolicy,
 					preferredLocation: accountInfo.writableLocations[0] ? accountInfo.writableLocations[0].name : '',
@@ -148,9 +147,10 @@ module.exports = {
 						tenant: data.tenantId,
 						subscription: data.subscriptionId,
 					}),
-				},
-				additionalAccountInfo,
-			);
+					...additionalAccountInfo,
+				};
+				
+
 
 			logger.log('info', modelInfo, 'Model info', data.hiddenKeys);
 			const dbCollectionsPromise = bucketList.map(async bucketName => {
@@ -164,8 +164,7 @@ module.exports = {
 				const partitionKey = getPartitionKey(collection);
 				const indexes = getIndexes(collection.indexingPolicy);
 				const isHierarchicalPartitionKey = Array.isArray(partitionKey) && partitionKey.length > 1;
-				const bucketInfo = Object.assign(
-					{
+				const bucketInfo = {
 						dbId: data.database,
 						capacityMode,
 						throughput,
@@ -178,9 +177,9 @@ module.exports = {
 						TTL: getTTL(collection.defaultTtl),
 						TTLseconds: collection.defaultTtl,
 						hierarchicalPartitionKey: isHierarchicalPartitionKey,
-					},
-					indexes,
-				);
+						...indexes,
+					};
+
 
 				const documentsAmount = await getDocumentsAmount(containerInstance);
 				const size = getSampleDocSize(documentsAmount, recordSamplingSettings);
@@ -357,10 +356,14 @@ function generateCustomInferSchema(documents, params) {
 		for (let prop in item) {
 			if (inferSchema.properties.hasOwnProperty(prop)) {
 				inferSchema.properties[prop]['#docs']++;
-				inferSchema.properties[prop]['samples'].indexOf(item[prop]) === -1 &&
-				inferSchema.properties[prop]['samples'].length < sampleSize
-					? inferSchema.properties[prop]['samples'].push(item[prop])
-					: '';
+
+				if (
+					inferSchema.properties[prop]['samples'].indexOf(item[prop]) === -1 &&
+					inferSchema.properties[prop]['samples'].length < sampleSize
+				) {
+					inferSchema.properties[prop]['samples'].push(item[prop])
+				}
+
 				inferSchema.properties[prop]['type'] = typeOf(item[prop]);
 			} else {
 				inferSchema.properties[prop] = {
