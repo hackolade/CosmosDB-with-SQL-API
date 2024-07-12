@@ -10,7 +10,7 @@ const add = (key, value) => obj => {
 };
 
 const escapeName = name => {
-	if (/^[0-9]/.test(name)) {
+	if (/^\d/.test(name)) {
 		return `"${name}"`;
 	} else if (/^[a-z0-9_]*$/i.test(name)) {
 		return name;
@@ -45,7 +45,7 @@ const getPath = (paths = []) => {
 	return items
 		.slice(0, -1)
 		.map(name => {
-			if (/^"/.test(name) && /"$/.test(name)) {
+			if (name.startsWith('"') && name.endsWith('"')) {
 				return name;
 			}
 
