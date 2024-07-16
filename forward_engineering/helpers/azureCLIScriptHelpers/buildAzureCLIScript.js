@@ -4,6 +4,7 @@ const { getUniqueKeyPolicyScript } = require('../getUniqueKeyPolicyScript');
 const { getCliParamsDelimiter } = require('./getCliParamsDelimiter');
 const getIndexPolicyScript = require('../getIndexPolicyScript');
 const getPartitionKey = require('../getPartitionKey');
+const { getCliShellName } = require('./getCliShellName');
 const {
 	CLI,
 	DATABASE,
@@ -16,7 +17,8 @@ const {
 
 const buildAzureCLIScript =
 	_ =>
-	({ modelData, containerData, shellName }) => {
+	({ modelData, containerData, options }) => {
+		const shellName = getCliShellName(options?.targetScriptOptions);
 		const cliParamsDelimiter = getCliParamsDelimiter(shellName);
 		const escapeAndWrapInQuotes = string => wrapInSingleQuotes(escapeShellCommand(shellName, string));
 
