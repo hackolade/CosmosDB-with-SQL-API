@@ -1,9 +1,8 @@
 const { wrapInSingleQuotes, escapeShellCommand } = require('./escapeShellSpecialCharacters');
-const applyToInstanceHelper = require('../../applyToInstance/applyToInstanceHelper');
 const { getUniqueKeyPolicyScript } = require('../getUniqueKeyPolicyScript');
 const { getCliParamsDelimiter } = require('./getCliParamsDelimiter');
-const getIndexPolicyScript = require('../getIndexPolicyScript');
-const getPartitionKey = require('../getPartitionKey');
+const { getIndexPolicyScript } = require('../getIndexPolicyScript');
+const { getPartitionKey } = require('../getPartitionKey');
 const { getCliShellName } = require('./getCliShellName');
 const {
 	CLI,
@@ -14,35 +13,35 @@ const {
 	TRIGGER,
 	USER_DEFINED_FUNCTION,
 } = require('./azureCLIConstants');
+const { getContainerThroughputProps } = require('../getContainerThroughputProps');
+const { getTTL } = require('../getTtl');
 
-const buildAzureCLIScript =
-	_ =>
-	({ modelData, containerData, options }) => {
-		const shellName = getCliShellName(options?.targetScriptOptions);
-		const cliParamsDelimiter = getCliParamsDelimiter(shellName);
-		const escapeAndWrapInQuotes = string => wrapInSingleQuotes(escapeShellCommand(shellName, string));
+const buildAzureCLIScript = ({ modelData, containerData, options }) => {
+	const shellName = getCliShellName(options?.targetScriptOptions);
+	const cliParamsDelimiter = getCliParamsDelimiter(shellName);
+	const escapeAndWrapInQuotes = string => wrapInSingleQuotes(escapeShellCommand(shellName, string));
 
-		const accountName = escapeAndWrapInQuotes(modelData[0]?.accountName || '');
-		const dbName = escapeAndWrapInQuotes(containerData[0]?.dbId || '');
-		const containerName = escapeAndWrapInQuotes(containerData[0]?.name || '');
-		const resourceGroup = escapeAndWrapInQuotes(modelData[0]?.resGrp || '');
-		const commonParams = {
-			accountName,
-			dbName,
-			resourceGroup,
-			containerName,
-			escapeAndWrapInQuotes,
-			cliParamsDelimiter,
-		};
-
-		return composeCLIStatements([
-			getAzureCliDbCreateStatement(commonParams),
-			getAzureCliContainerCreateStatement(_)({ containerData, ...commonParams }),
-			...getAzureCliStoredProcedureStatements({ containerData, ...commonParams }),
-			...getAzureCliTriggerCreateStatements({ containerData, ...commonParams }),
-			...getAzureCliUDFCreateStatements({ containerData, ...commonParams }),
-		]);
+	const accountName = escapeAndWrapInQuotes(modelData[0]?.accountName || '');
+	const dbName = escapeAndWrapInQuotes(containerData[0]?.dbId || '');
+	const containerName = escapeAndWrapInQuotes(containerData[0]?.name || '');
+	const resourceGroup = escapeAndWrapInQuotes(modelData[0]?.resGrp || '');
+	const commonParams = {
+		accountName,
+		dbName,
+		resourceGroup,
+		containerName,
+		escapeAndWrapInQuotes,
+		cliParamsDelimiter,
 	};
+
+	return composeCLIStatements([
+		getAzureCliDbCreateStatement(commonParams),
+		getAzureCliContainerCreateStatement({ containerData, ...commonParams }),
+		...getAzureCliStoredProcedureStatements({ containerData, ...commonParams }),
+		...getAzureCliTriggerCreateStatements({ containerData, ...commonParams }),
+		...getAzureCliUDFCreateStatements({ containerData, ...commonParams }),
+	]);
+};
 
 const getAzureCliDbCreateStatement = ({ accountName, dbName, resourceGroup, cliParamsDelimiter }) => {
 	const cliStatement = `${CLI} ${DATABASE} ${CREATE}`;
@@ -55,41 +54,35 @@ const getAzureCliDbCreateStatement = ({ accountName, dbName, resourceGroup, cliP
 	return [cliStatement, requiredParams].join(cliParamsDelimiter);
 };
 
-const getAzureCliContainerCreateStatement =
-	_ =>
-	({
-		containerData,
-		accountName,
-		dbName,
-		resourceGroup,
-		containerName,
-		escapeAndWrapInQuotes,
-		cliParamsDelimiter,
-	}) => {
-		const helper = applyToInstanceHelper(_);
+const getAzureCliContainerCreateStatement = ({
+	containerData,
+	accountName,
+	dbName,
+	resourceGroup,
+	containerName,
+	escapeAndWrapInQuotes,
+	cliParamsDelimiter,
+}) => {
+	const partitionKeyParams = getPartitionKeyParams(containerData);
+	const throughputParam = getThroughputParam(getContainerThroughputProps(containerData[0]));
+	const indexingPolicyParam = `--idx ${escapeAndWrapInQuotes(JSON.stringify(getIndexPolicyScript(containerData)))}`;
+	const uniqueKeysPolicyParam = getUniqueKeysPolicyParam(containerData[0], escapeAndWrapInQuotes);
+	const ttl = getTTL(containerData[0]);
+	const ttlParam = ttl !== 0 ? `--ttl ${ttl}` : '';
 
-		const partitionKeyParams = getPartitionKeyParams(_)(containerData);
-		const throughputParam = getThroughputParam(helper.getContainerThroughputProps(containerData[0]));
-		const indexingPolicyParam = `--idx ${escapeAndWrapInQuotes(
-			JSON.stringify(getIndexPolicyScript(_)(containerData)),
-		)}`;
-		const uniqueKeysPolicyParam = getUniqueKeysPolicyParam(containerData[0], escapeAndWrapInQuotes);
-		const ttl = helper.getTTL(containerData[0]);
-		const ttlParam = ttl !== 0 ? `--ttl ${helper.getTTL(containerData[0])}` : '';
+	const cliStatement = `${CLI} ${CONTAINER} ${CREATE}`;
+	const requiredParams = [
+		`--account-name ${accountName}`,
+		`--database-name ${dbName}`,
+		`--name ${containerName}`,
+		`--resource-group ${resourceGroup}`,
+		...partitionKeyParams,
+	].join(cliParamsDelimiter);
 
-		const cliStatement = `${CLI} ${CONTAINER} ${CREATE}`;
-		const requiredParams = [
-			`--account-name ${accountName}`,
-			`--database-name ${dbName}`,
-			`--name ${containerName}`,
-			`--resource-group ${resourceGroup}`,
-			...partitionKeyParams,
-		].join(cliParamsDelimiter);
-
-		return [cliStatement, requiredParams, indexingPolicyParam, uniqueKeysPolicyParam, throughputParam, ttlParam]
-			.filter(Boolean)
-			.join(cliParamsDelimiter);
-	};
+	return [cliStatement, requiredParams, indexingPolicyParam, uniqueKeysPolicyParam, throughputParam, ttlParam]
+		.filter(Boolean)
+		.join(cliParamsDelimiter);
+};
 
 const getAzureCliStoredProcedureStatements = ({
 	containerData,
@@ -181,8 +174,8 @@ const getUniqueKeysPolicyParam = (containerData, escapeAndWrapInQuotes) => {
 	return uniqueKeysPolicyParam;
 };
 
-const getPartitionKeyParams = _ => containerData => {
-	const partitionKey = getPartitionKey(_)(containerData);
+const getPartitionKeyParams = containerData => {
+	const partitionKey = getPartitionKey(containerData);
 	if (typeof partitionKey === 'string') {
 		return [`--partition-key-path ${wrapInSingleQuotes(partitionKey)}`];
 	}
@@ -213,4 +206,6 @@ const composeCLIStatements = (statements = []) => {
 	return statements.join('\n\n');
 };
 
-module.exports = { buildAzureCLIScript };
+module.exports = {
+	buildAzureCLIScript,
+};

@@ -4,7 +4,12 @@ const executeWithTimeout = (f, timeout = 30000) =>
 			reject(new Error('Timeout exceeded. Please check your connections settings and try again'));
 		}, timeout);
 
-		f().then(resolve).catch(reject).finally(() => clearTimeout(t))
+		f()
+			.then(resolve)
+			.catch(reject)
+			.finally(() => clearTimeout(t));
 	});
 
-module.exports = executeWithTimeout;
+module.exports = {
+	executeWithTimeout,
+};
