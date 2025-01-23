@@ -1,11 +1,10 @@
-'use strict';
-
-const setUpDocumentClient = require('./helpers/setUpDocumentClient');
 const _ = require('lodash');
 const axios = require('axios');
 const qs = require('qs');
-const executeWithTimeout = require('./helpers/executeWithTimeout');
+const setUpDocumentClient = require('./helpers/setUpDocumentClient');
+const { executeWithTimeout } = require('../shared/executeWithTimeout');
 const { TTL_ON_DEFAULT, TTL_ON, TTL_OFF } = require('../shared/constants');
+
 let client;
 
 module.exports = {
@@ -139,18 +138,16 @@ module.exports = {
 			const { resource: accountInfo } = await client.getDatabaseAccount();
 			const additionalAccountInfo = await getAdditionalAccountInfo(data, logger);
 			const modelInfo = {
-					accountID: data.accountKey,
-					defaultConsistency: accountInfo.consistencyPolicy,
-					preferredLocation: accountInfo.writableLocations[0] ? accountInfo.writableLocations[0].name : '',
-					...(data?.includeAccountInformation && {
-						resGrp: data.resourceGroupName,
-						tenant: data.tenantId,
-						subscription: data.subscriptionId,
-					}),
-					...additionalAccountInfo,
-				};
-				
-
+				accountID: data.accountKey,
+				defaultConsistency: accountInfo.consistencyPolicy,
+				preferredLocation: accountInfo.writableLocations[0] ? accountInfo.writableLocations[0].name : '',
+				...(data?.includeAccountInformation && {
+					resGrp: data.resourceGroupName,
+					tenant: data.tenantId,
+					subscription: data.subscriptionId,
+				}),
+				...additionalAccountInfo,
+			};
 
 			logger.log('info', modelInfo, 'Model info', data.hiddenKeys);
 			const dbCollectionsPromise = bucketList.map(async bucketName => {
@@ -165,21 +162,20 @@ module.exports = {
 				const indexes = getIndexes(collection.indexingPolicy);
 				const isHierarchicalPartitionKey = Array.isArray(partitionKey) && partitionKey.length > 1;
 				const bucketInfo = {
-						dbId: data.database,
-						capacityMode,
-						throughput,
-						autopilot,
-						partitionKey,
-						uniqueKey: getUniqueKeys(collection),
-						storedProcs,
-						triggers,
-						udfs,
-						TTL: getTTL(collection.defaultTtl),
-						TTLseconds: collection.defaultTtl,
-						hierarchicalPartitionKey: isHierarchicalPartitionKey,
-						...indexes,
-					};
-
+					dbId: data.database,
+					capacityMode,
+					throughput,
+					autopilot,
+					partitionKey,
+					uniqueKey: getUniqueKeys(collection),
+					storedProcs,
+					triggers,
+					udfs,
+					TTL: getTTL(collection.defaultTtl),
+					TTLseconds: collection.defaultTtl,
+					hierarchicalPartitionKey: isHierarchicalPartitionKey,
+					...indexes,
+				};
 
 				const documentsAmount = await getDocumentsAmount(containerInstance);
 				const size = getSampleDocSize(documentsAmount, recordSamplingSettings);
@@ -287,8 +283,6 @@ async function getOfferType(collection, logger) {
 		return offer.length > 0 && offer[0];
 	} catch (e) {
 		logger.log('error', { message: e.message, stack: e.stack }, '[Warning] Error querying offers');
-
-		return;
 	}
 }
 
@@ -361,7 +355,7 @@ function generateCustomInferSchema(documents, params) {
 					inferSchema.properties[prop]['samples'].indexOf(item[prop]) === -1 &&
 					inferSchema.properties[prop]['samples'].length < sampleSize
 				) {
-					inferSchema.properties[prop]['samples'].push(item[prop])
+					inferSchema.properties[prop]['samples'].push(item[prop]);
 				}
 
 				inferSchema.properties[prop]['type'] = typeOf(item[prop]);
@@ -535,9 +529,9 @@ function getIndexes(indexingPolicy) {
 }
 
 const getIndexPathType = path => {
-	if (/\?$/.test(path)) {
+	if (path.endsWith('?')) {
 		return '?';
-	} else if (/\*$/.test(path)) {
+	} else if (path.endsWith('*')) {
 		return '*';
 	} else {
 		return '';
@@ -546,7 +540,7 @@ const getIndexPathType = path => {
 
 const getIndexPath = path => {
 	const type = getIndexPathType(path);
-	const name = path.replace(/\/(\?|\*)$/, '');
+	const name = path.replace(/\/([?*])$/, '');
 
 	return {
 		name: getKeyPath(name),
