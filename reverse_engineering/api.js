@@ -18,9 +18,7 @@ module.exports = {
 	},
 
 	testConnection: async function (connectionInfo, logger, cb) {
-		logger.clear();
 		client = setUpDocumentClient(connectionInfo);
-		logger.log('info', connectionInfo, 'Reverse-Engineering connection settings', connectionInfo.hiddenKeys);
 		try {
 			await executeWithTimeout(getDatabasesData);
 			return cb();
@@ -31,8 +29,6 @@ module.exports = {
 
 	getDatabases: async function (connectionInfo, logger, cb) {
 		client = setUpDocumentClient(connectionInfo);
-		logger.clear();
-		logger.log('info', connectionInfo, 'Reverse-Engineering connection settings', connectionInfo.hiddenKeys);
 
 		try {
 			const dbsData = await getDatabasesData();
@@ -47,7 +43,6 @@ module.exports = {
 
 	getDocumentKinds: async function (connectionInfo, logger, cb) {
 		client = setUpDocumentClient(connectionInfo);
-		logger.log('info', connectionInfo, 'Reverse-Engineering connection settings', connectionInfo.hiddenKeys);
 
 		try {
 			const collections = await listCollections(connectionInfo.database);
@@ -92,8 +87,6 @@ module.exports = {
 	getDbCollectionsNames: async function (connectionInfo, logger, cb) {
 		try {
 			client = setUpDocumentClient(connectionInfo);
-			logger.log('info', connectionInfo, 'Reverse-Engineering connection settings', connectionInfo.hiddenKeys);
-
 			logger.log(
 				'info',
 				{ Database: connectionInfo.database },
@@ -123,34 +116,24 @@ module.exports = {
 		try {
 			logger.progress = logger.progress || (() => {});
 			client = setUpDocumentClient(data);
-			logger.log('info', data, 'Reverse-Engineering connection settings', data.hiddenKeys);
 
 			const { recordSamplingSettings, fieldInference } = data;
-			logger.log(
-				'info',
-				getSamplingInfo(recordSamplingSettings, fieldInference),
-				'Reverse-Engineering sampling params',
-				data.hiddenKeys,
-			);
-
 			const bucketList = data.collectionData.dataBaseNames;
 			logger.log('info', { CollectionList: bucketList }, 'Selected collection list', data.hiddenKeys);
 
 			const { resource: accountInfo } = await client.getDatabaseAccount();
 			const additionalAccountInfo = await getAdditionalAccountInfo(data, logger);
 			const modelInfo = {
-					accountID: data.accountKey,
-					defaultConsistency: accountInfo.consistencyPolicy,
-					preferredLocation: accountInfo.writableLocations[0] ? accountInfo.writableLocations[0].name : '',
-					...(data?.includeAccountInformation && {
-						resGrp: data.resourceGroupName,
-						tenant: data.tenantId,
-						subscription: data.subscriptionId,
-					}),
-					...additionalAccountInfo,
-				};
-				
-
+				accountID: data.accountKey,
+				defaultConsistency: accountInfo.consistencyPolicy,
+				preferredLocation: accountInfo.writableLocations[0] ? accountInfo.writableLocations[0].name : '',
+				...(data?.includeAccountInformation && {
+					resGrp: data.resourceGroupName,
+					tenant: data.tenantId,
+					subscription: data.subscriptionId,
+				}),
+				...additionalAccountInfo,
+			};
 
 			logger.log('info', modelInfo, 'Model info', data.hiddenKeys);
 			const dbCollectionsPromise = bucketList.map(async bucketName => {
@@ -165,21 +148,20 @@ module.exports = {
 				const indexes = getIndexes(collection.indexingPolicy);
 				const isHierarchicalPartitionKey = Array.isArray(partitionKey) && partitionKey.length > 1;
 				const bucketInfo = {
-						dbId: data.database,
-						capacityMode,
-						throughput,
-						autopilot,
-						partitionKey,
-						uniqueKey: getUniqueKeys(collection),
-						storedProcs,
-						triggers,
-						udfs,
-						TTL: getTTL(collection.defaultTtl),
-						TTLseconds: collection.defaultTtl,
-						hierarchicalPartitionKey: isHierarchicalPartitionKey,
-						...indexes,
-					};
-
+					dbId: data.database,
+					capacityMode,
+					throughput,
+					autopilot,
+					partitionKey,
+					uniqueKey: getUniqueKeys(collection),
+					storedProcs,
+					triggers,
+					udfs,
+					TTL: getTTL(collection.defaultTtl),
+					TTLseconds: collection.defaultTtl,
+					hierarchicalPartitionKey: isHierarchicalPartitionKey,
+					...indexes,
+				};
 
 				const documentsAmount = await getDocumentsAmount(containerInstance);
 				const size = getSampleDocSize(documentsAmount, recordSamplingSettings);
@@ -361,7 +343,7 @@ function generateCustomInferSchema(documents, params) {
 					inferSchema.properties[prop]['samples'].indexOf(item[prop]) === -1 &&
 					inferSchema.properties[prop]['samples'].length < sampleSize
 				) {
-					inferSchema.properties[prop]['samples'].push(item[prop])
+					inferSchema.properties[prop]['samples'].push(item[prop]);
 				}
 
 				inferSchema.properties[prop]['type'] = typeOf(item[prop]);
@@ -684,8 +666,6 @@ async function getAdditionalAccountInfo(connectionInfo, logger) {
 	if (connectionInfo.disableSSL || !connectionInfo.includeAccountInformation) {
 		return {};
 	}
-
-	logger.log('info', {}, 'Account additional info', connectionInfo.hiddenKeys);
 
 	try {
 		const { clientId, appSecret, tenantId, subscriptionId, resourceGroupName, host } = connectionInfo;

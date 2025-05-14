@@ -67,8 +67,6 @@ module.exports = {
 		try {
 			const helper = applyToInstanceHelper(_);
 			logger.progress = logger.progress || (() => {});
-			logger.clear();
-			logger.log('info', connectionInfo, 'Apply to instance connection settings', connectionInfo.hiddenKeys);
 			const client = helper.setUpDocumentClient(connectionInfo);
 			const script = parseScript(connectionInfo.script);
 			const containerData = _.get(connectionInfo, 'containerData[0]');
