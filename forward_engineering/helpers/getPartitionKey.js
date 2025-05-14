@@ -1,6 +1,7 @@
+const _ = require('lodash');
 const { PARTITION_KEY_DEFINITION_VERSION, PARTITION_KEY_KIND } = require('../../shared/constants');
 
-const getPartitionKey = _ => containerData => {
+const getPartitionKey = containerData => {
 	const fixNamePath = key => (key?.name || '').trim().replace(/\/$/, '');
 	const partitionKeys = _.get(containerData, '[0].partitionKey', []);
 	const isHierarchical = _.get(containerData, '[0].hierarchicalPartitionKey', false);
@@ -16,4 +17,6 @@ const getPartitionKey = _ => containerData => {
 	};
 };
 
-module.exports = getPartitionKey;
+module.exports = {
+	getPartitionKey,
+};

@@ -1,8 +1,7 @@
 const { StoredProcedure, UserDefinedFunction, Trigger } = require('@azure/cosmos');
 const setUpDocumentClient = require('../../reverse_engineering/helpers/setUpDocumentClient');
-const { TTL_ON_DEFAULT, TTL_ON, TTL_OFF } = require('../../shared/constants');
 
-const applyToInstanceHelper = _ => ({
+const applyToInstanceHelper = {
 	setUpDocumentClient(connectionInfo) {
 		return setUpDocumentClient(connectionInfo);
 	},
@@ -57,28 +56,6 @@ const applyToInstanceHelper = _ => ({
 			}
 		}, Promise.resolve());
 	},
-
-	getTTL(containerData) {
-		switch (containerData?.TTL) {
-			case TTL_ON_DEFAULT:
-				return -1;
-			case TTL_ON:
-				return _.parseInt(containerData?.TTLseconds) || -1;
-			case TTL_OFF:
-			default:
-				return 0;
-		}
-	},
-
-	getContainerThroughputProps(containerData) {
-		if (containerData?.capacityMode === 'Serverless') {
-			return {};
-		}
-		if (containerData?.autopilot) {
-			return { maxThroughput: containerData.throughput || 4000 };
-		}
-		return { throughput: containerData?.throughput || 400 };
-	},
-});
+};
 
 module.exports = applyToInstanceHelper;

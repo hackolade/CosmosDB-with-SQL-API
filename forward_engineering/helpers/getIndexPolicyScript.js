@@ -1,3 +1,5 @@
+const _ = require('lodash');
+
 const add = (key, value) => obj => {
 	if (value === undefined || value === '' || (Array.isArray(value) && value.length === 0)) {
 		return obj;
@@ -61,7 +63,7 @@ const filterDeactivated = items => {
 	});
 };
 
-const getIndex = _ => item => {
+const getIndex = item => {
 	const precision = Number(item.indexPrecision);
 	return _.flow(
 		add('kind', item.kind),
@@ -70,76 +72,68 @@ const getIndex = _ => item => {
 	)({});
 };
 
-const getIncludedPath =
-	_ =>
-	(includedPaths = []) => {
-		return filterDeactivated(includedPaths)
-			.map(item => {
-				return _.flow(add('path', getPath(item.indexIncludedPath)))({});
-			})
-			.filter(item => !_.isEmpty(item));
-	};
-
-const getExcludedPath =
-	_ =>
-	(excludedPaths = []) => {
-		return filterDeactivated(excludedPaths)
-			.map(item => {
-				return _.flow(add('path', getPath(item.indexExcludedPath)))({});
-			})
-			.filter(item => !_.isEmpty(item));
-	};
-
-const getCompositeIndexes =
-	_ =>
-	(compositeIndexes = []) => {
-		return filterDeactivated(compositeIndexes)
-			.map(item => {
-				if (!Array.isArray(item.compositeFieldPath)) {
-					return;
-				}
-
-				return _.uniqWith(
-					item.compositeFieldPath.map(item => {
-						const path = item.name.split('/');
-
-						return {
-							path: ['', ...path.slice(1).map(prepareName)].join('/'),
-							order: item.type || 'ascending',
-						};
-					}),
-					(a, b) => a.path === b.path,
-				).filter(item => !_.isEmpty(item));
-			})
-			.filter(item => !_.isEmpty(item));
-	};
-
-const getSpatialIndexes =
-	_ =>
-	(spatialIndexes = []) => {
-		return filterDeactivated(spatialIndexes)
-			.map(item => {
-				return _.flow(
-					add('path', getPath(item.indexIncludedPath)),
-					add('types', (item.dataTypes || []).map(dataType => dataType.spatialType).filter(Boolean)),
-				)({});
-			})
-			.filter(item => !_.isEmpty(item) && item.path);
-	};
-
-const getIndexPolicyScript = _ => containerData => {
-	const indexTab = containerData[1] || {};
-
-	const indexScript = _.flow(
-		add('automatic', indexTab.indexingAutomatic === 'true'),
-		add('indexingMode', indexTab.indexingMode),
-		add('includedPaths', getIncludedPath(_)(indexTab.includedPaths)),
-		add('excludedPaths', getExcludedPath(_)(indexTab.excludedPaths)),
-		add('spatialIndexes', getSpatialIndexes(_)(indexTab.spatialIndexes)),
-		add('compositeIndexes', getCompositeIndexes(_)(indexTab.compositeIndexes)),
-	)({});
-
-	return indexScript;
+const getIncludedPath = (includedPaths = []) => {
+	return filterDeactivated(includedPaths)
+		.map(item => {
+			return _.flow(add('path', getPath(item.indexIncludedPath)))({});
+		})
+		.filter(item => !_.isEmpty(item));
 };
 
-module.exports = getIndexPolicyScript;
+const getExcludedPath = (excludedPaths = []) => {
+	return filterDeactivated(excludedPaths)
+		.map(item => {
+			return _.flow(add('path', getPath(item.indexExcludedPath)))({});
+		})
+		.filter(item => !_.isEmpty(item));
+};
+
+const getCompositeIndexes = (compositeIndexes = []) => {
+	return filterDeactivated(compositeIndexes)
+		.map(item => {
+			if (!Array.isArray(item.compositeFieldPath)) {
+				return;
+			}
+
+			return _.uniqWith(
+				item.compositeFieldPath.map(item => {
+					const path = item.name.split('/');
+
+					return {
+						path: ['', ...path.slice(1).map(prepareName)].join('/'),
+						order: item.type || 'ascending',
+					};
+				}),
+				(a, b) => a.path === b.path,
+			).filter(item => !_.isEmpty(item));
+		})
+		.filter(item => !_.isEmpty(item));
+};
+
+const getSpatialIndexes = (spatialIndexes = []) => {
+	return filterDeactivated(spatialIndexes)
+		.map(item => {
+			return _.flow(
+				add('path', getPath(item.indexIncludedPath)),
+				add('types', (item.dataTypes || []).map(dataType => dataType.spatialType).filter(Boolean)),
+			)({});
+		})
+		.filter(item => !_.isEmpty(item) && item.path);
+};
+
+const getIndexPolicyScript = containerData => {
+	const indexTab = containerData[1] || {};
+
+	return _.flow(
+		add('automatic', indexTab.indexingAutomatic === 'true'),
+		add('indexingMode', indexTab.indexingMode),
+		add('includedPaths', getIncludedPath(indexTab.includedPaths)),
+		add('excludedPaths', getExcludedPath(indexTab.excludedPaths)),
+		add('spatialIndexes', getSpatialIndexes(indexTab.spatialIndexes)),
+		add('compositeIndexes', getCompositeIndexes(indexTab.compositeIndexes)),
+	)({});
+};
+
+module.exports = {
+	getIndexPolicyScript,
+};

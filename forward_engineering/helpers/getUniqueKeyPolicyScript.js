@@ -22,4 +22,6 @@ const getUniqueKeyPolicyScript = uniqueKeys => {
 	return { uniqueKeyPolicy: { uniqueKeys: getUniqueKeys(uniqueKeys) } };
 };
 
-module.exports = { getUniqueKeyPolicyScript };
+module.exports = {
+	getUniqueKeyPolicyScript,
+};

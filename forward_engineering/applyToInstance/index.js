@@ -1,7 +1,10 @@
+const _ = require('lodash');
 const reApi = require('../../reverse_engineering/api');
-const executeWithTimeout = require('../../reverse_engineering/helpers/executeWithTimeout');
-const { TTL_ON, TTL_ON_DEFAULT } = require('../../shared/constants');
 const applyToInstanceHelper = require('./applyToInstanceHelper');
+const { executeWithTimeout } = require('../../shared/executeWithTimeout');
+const { TTL_ON, TTL_ON_DEFAULT } = require('../../shared/constants');
+const { getTTL } = require('../helpers/getTtl');
+const { getContainerThroughputProps } = require('../helpers/getContainerThroughputProps');
 
 const createOrUpdate = async (sample, container) => {
 	try {
@@ -62,12 +65,11 @@ const updateIndexingPolicy = indexes => {
 
 module.exports = {
 	testConnection: reApi.testConnection,
+
 	async applyToInstance(connectionInfo, logger, callback, app) {
-		const _ = app.require('lodash');
 		try {
-			const helper = applyToInstanceHelper(_);
 			logger.progress = logger.progress || (() => {});
-			const client = helper.setUpDocumentClient(connectionInfo);
+			const client = applyToInstanceHelper.setUpDocumentClient(connectionInfo);
 			const script = parseScript(connectionInfo.script);
 			const containerData = _.get(connectionInfo, 'containerData[0]');
 			const databaseId = _.get(containerData, 'dbId');
@@ -91,9 +93,9 @@ module.exports = {
 			const { container, resource: containerDef } = await database.containers.createIfNotExists({
 				id: containerId,
 				partitionKey: script.partitionKey,
-				...(shouldIncludeTtl && { defaultTtl: helper.getTTL(containerData) }),
+				...(shouldIncludeTtl && { defaultTtl: getTTL(containerData) }),
 				...(script.uniqueKeyPolicy && { uniqueKeyPolicy: script.uniqueKeyPolicy }),
-				...helper.getContainerThroughputProps(containerData),
+				...getContainerThroughputProps(containerData),
 			});
 
 			progress('Add sample documents ...');
@@ -117,19 +119,19 @@ module.exports = {
 			const storedProcs = _.get(script, 'Stored Procedures', []);
 			if (storedProcs.length) {
 				progress('Upload stored procs ...');
-				await helper.createStoredProcs(storedProcs, container);
+				await applyToInstanceHelper.createStoredProcs(storedProcs, container);
 			}
 
 			const udfs = _.get(script, 'User Defined Functions', []);
 			if (udfs.length) {
 				progress('Upload user defined functions ...');
-				await helper.createUDFs(udfs, container);
+				await applyToInstanceHelper.createUDFs(udfs, container);
 			}
 
 			const triggers = _.get(script, 'Triggers', []);
 			if (triggers.length) {
 				progress('Upload triggers ...');
-				await helper.createTriggers(triggers, container);
+				await applyToInstanceHelper.createTriggers(triggers, container);
 			}
 
 			progress('Applying to instance finished');

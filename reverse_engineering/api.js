@@ -1,11 +1,10 @@
-'use strict';
-
-const setUpDocumentClient = require('./helpers/setUpDocumentClient');
 const _ = require('lodash');
 const axios = require('axios');
 const qs = require('qs');
-const executeWithTimeout = require('./helpers/executeWithTimeout');
+const setUpDocumentClient = require('./helpers/setUpDocumentClient');
+const { executeWithTimeout } = require('../shared/executeWithTimeout');
 const { TTL_ON_DEFAULT, TTL_ON, TTL_OFF } = require('../shared/constants');
+
 let client;
 
 module.exports = {
@@ -269,8 +268,6 @@ async function getOfferType(collection, logger) {
 		return offer.length > 0 && offer[0];
 	} catch (e) {
 		logger.log('error', { message: e.message, stack: e.stack }, '[Warning] Error querying offers');
-
-		return;
 	}
 }
 
@@ -517,9 +514,9 @@ function getIndexes(indexingPolicy) {
 }
 
 const getIndexPathType = path => {
-	if (/\?$/.test(path)) {
+	if (path.endsWith('?')) {
 		return '?';
-	} else if (/\*$/.test(path)) {
+	} else if (path.endsWith('*')) {
 		return '*';
 	} else {
 		return '';
@@ -528,7 +525,7 @@ const getIndexPathType = path => {
 
 const getIndexPath = path => {
 	const type = getIndexPathType(path);
-	const name = path.replace(/\/(\?|\*)$/, '');
+	const name = path.replace(/\/([?*])$/, '');
 
 	return {
 		name: getKeyPath(name),
