@@ -17,9 +17,7 @@ module.exports = {
 	},
 
 	testConnection: async function (connectionInfo, logger, cb) {
-		logger.clear();
 		client = setUpDocumentClient(connectionInfo);
-		logger.log('info', connectionInfo, 'Reverse-Engineering connection settings', connectionInfo.hiddenKeys);
 		try {
 			await executeWithTimeout(getDatabasesData);
 			return cb();
@@ -30,8 +28,6 @@ module.exports = {
 
 	getDatabases: async function (connectionInfo, logger, cb) {
 		client = setUpDocumentClient(connectionInfo);
-		logger.clear();
-		logger.log('info', connectionInfo, 'Reverse-Engineering connection settings', connectionInfo.hiddenKeys);
 
 		try {
 			const dbsData = await getDatabasesData();
@@ -46,7 +42,6 @@ module.exports = {
 
 	getDocumentKinds: async function (connectionInfo, logger, cb) {
 		client = setUpDocumentClient(connectionInfo);
-		logger.log('info', connectionInfo, 'Reverse-Engineering connection settings', connectionInfo.hiddenKeys);
 
 		try {
 			const collections = await listCollections(connectionInfo.database);
@@ -91,8 +86,6 @@ module.exports = {
 	getDbCollectionsNames: async function (connectionInfo, logger, cb) {
 		try {
 			client = setUpDocumentClient(connectionInfo);
-			logger.log('info', connectionInfo, 'Reverse-Engineering connection settings', connectionInfo.hiddenKeys);
-
 			logger.log(
 				'info',
 				{ Database: connectionInfo.database },
@@ -122,16 +115,8 @@ module.exports = {
 		try {
 			logger.progress = logger.progress || (() => {});
 			client = setUpDocumentClient(data);
-			logger.log('info', data, 'Reverse-Engineering connection settings', data.hiddenKeys);
 
 			const { recordSamplingSettings, fieldInference } = data;
-			logger.log(
-				'info',
-				getSamplingInfo(recordSamplingSettings, fieldInference),
-				'Reverse-Engineering sampling params',
-				data.hiddenKeys,
-			);
-
 			const bucketList = data.collectionData.dataBaseNames;
 			logger.log('info', { CollectionList: bucketList }, 'Selected collection list', data.hiddenKeys);
 
@@ -678,8 +663,6 @@ async function getAdditionalAccountInfo(connectionInfo, logger) {
 	if (connectionInfo.disableSSL || !connectionInfo.includeAccountInformation) {
 		return {};
 	}
-
-	logger.log('info', {}, 'Account additional info', connectionInfo.hiddenKeys);
 
 	try {
 		const { clientId, appSecret, tenantId, subscriptionId, resourceGroupName, host } = connectionInfo;
