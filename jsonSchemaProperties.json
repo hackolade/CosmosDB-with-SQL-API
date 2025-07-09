@@ -4,8 +4,7 @@
 		"name",
 		"users",
 		"indexes",
-		"collectionUsers",
-		"additionalPropertieserties"
+		"collectionUsers"
 	],
 	"removeIfPropsNegative": ["partitionKey", "sortKey"]
 }
