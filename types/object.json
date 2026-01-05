@@ -3,6 +3,7 @@
 	"erdAbbreviation": "<obj>",
 	"dtdAbbreviation": "{...}",
 	"parentType": "document",
+	"default": true,
 	"defaultValues": {
 		"type": "document",
 		"childType": "object",
