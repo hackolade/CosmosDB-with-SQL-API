@@ -6,6 +6,9 @@
  * IntegrIT S.A. or in accordance with the terms and conditions stipulated in
  * the agreement/contract under which the software has been supplied.
  *
+ * Adapter to remove binary type support from Cosmos DB SQL API plugin.
+ * Binary type is not native to JSON, so all binary fields are transformed to string.
+ *
  * {
  * 		"add": {
  * 			"entity": [<names of new property>],
@@ -39,8 +42,15 @@
  * 		},
  * }
  */
+
 {
-	"add": {
-		"container": ["capacityMode"]
+	"modify": {
+		"field": [
+			{
+				"from": { "type": "binary" },
+				"to": { "type": "string" }
+			}
+		]
 	}
 }
+
