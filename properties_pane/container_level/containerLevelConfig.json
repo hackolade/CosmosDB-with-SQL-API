@@ -365,6 +365,8 @@ making sure that you maintain a proper JSON format.
 						"templateOptions": {
 							"divider": "/",
 							"front": true,
+							"checkbox": "/*",
+							"rootTemplate": "/*",
 							"maxField": 1,
 							"root": true,
 							"lastArray": "*",
@@ -485,6 +487,8 @@ making sure that you maintain a proper JSON format.
 							"divider": "/",
 							"front": true,
 							"maxField": 1,
+							"checkbox": "/*",
+							"rootTemplate": "/*",
 							"root": true,
 							"lastArray": "*",
 							"ending": {
