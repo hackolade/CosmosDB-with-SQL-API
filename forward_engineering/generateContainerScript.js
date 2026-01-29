@@ -19,9 +19,11 @@ const generateContainerScript = (data, logger, callback, app) => {
 			),
 		);
 		if (data.options?.targetScriptOptions?.keyword === 'containerSettingsJson') {
+			const partitionKeys = _.get(data.containerData, '[0].partitionKey', []);
 			const uniqueKeys = _.get(data.containerData, '[0].uniqueKey', []);
+
 			const scriptData = {
-				partitionKey: getPartitionKey(data.containerData),
+				...(partitionKeys.length && { partitionKey: getPartitionKey(data.containerData) }),
 				...(uniqueKeys.length && getUniqueKeyPolicyScript(uniqueKeys)),
 				indexingPolicy: getIndexPolicyScript(data.containerData),
 				...(withSamples && { sample: samples }),
