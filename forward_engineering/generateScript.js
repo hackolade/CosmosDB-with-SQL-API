@@ -7,10 +7,11 @@ const { updateSample } = require('./helpers/updateSample');
 
 const generateScript = (data, logger, callback, app) => {
 	try {
+		const partitionKeys = _.get(data.containerData, '[0].partitionKey', []);
 		const uniqueKeys = _.get(data.containerData, '[0].uniqueKey', []);
 
 		const script = {
-			partitionKey: getPartitionKey(data.containerData),
+			...(partitionKeys.length && { partitionKey: getPartitionKey(data.containerData) }),
 			indexingPolicy: getIndexPolicyScript(data.containerData),
 			...(uniqueKeys.length && getUniqueKeyPolicyScript(uniqueKeys)),
 			sample: updateSample(JSON.parse(data.jsonData), data.containerData[0], data.entityData[0]),
