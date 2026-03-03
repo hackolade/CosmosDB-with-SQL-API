@@ -1,6 +1,6 @@
 {
     "name": "CosmosDB-with-SQL-API",
-    "version": "0.2.10",
+    "version": "0.2.11",
     "author": "hackolade",
     "engines": {
         "hackolade": "5.1.3",
