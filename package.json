@@ -24,7 +24,7 @@
         "@azure/cosmos": "3.17.3",
         "axios": "1.15.0",
         "lodash": "4.18.1",
-        "qs": "6.14.2"
+        "qs": "6.15.1"
     },
     "simple-git-hooks": {
         "pre-commit": "npm run package && npx lint-staged --config lint-staged.config.js",
@@ -51,6 +51,7 @@
         "simple-git-hooks": "2.13.1"
     },
     "overrides": {
-        "minimatch": "10.2.4"
+        "minimatch": "10.2.4",
+        "uuid": "14.0.0"
     }
 }
