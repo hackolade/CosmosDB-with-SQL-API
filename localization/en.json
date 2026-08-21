@@ -150,7 +150,7 @@
 	"TOOLBAR___HIDE_ALL_ATTRIBUTES": "Empty item type boxes",
 	"TOOLBAR___REQUIRED_ATTRIBUTES": "Required attributes",
 	"TOOLBAR___NULLABLE_ATTRIBUTES": "Nullable attributes",
-	"MODAL_WINDOW___OPTIONS_DISPLAY_ERD_V_ENTITY_BOX_CONTENT": "Display of item box content",
+	"MODAL_WINDOW___OPTIONS_DISPLAY_ERD_V_ENTITY_BOX_CONTENT": "Display of item type box content",
 	"MODAL_WINDOW___OPTIONS_DISPLAY_ERD_V_FIELDS": "Attributes",
 	"MODAL_WINDOW___OPTIONS_DISPLAY_REQUIRED_ATTRIBUTES": "Required attributes",
 	"MODAL_WINDOW___OPTIONS_DISPLAY_NULLABLE_ATTRIBUTES": "Nullable attributes"
