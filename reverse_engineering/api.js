@@ -1,6 +1,5 @@
 const _ = require('lodash');
-const axios = require('axios');
-const qs = require('qs');
+const { hckFetch } = require('@hackolade/fetch');
 const setUpDocumentClient = require('./helpers/setUpDocumentClient');
 const { executeWithTimeout } = require('../shared/executeWithTimeout');
 const { TTL_ON_DEFAULT, TTL_ON, TTL_OFF } = require('../shared/constants');
@@ -686,27 +685,27 @@ async function getAdditionalAccountInfo(connectionInfo, logger) {
 		const accNameRegex = /https:\/\/(.+)\.documents.+/i;
 		const accountName = accNameRegex.test(host) ? accNameRegex.exec(host)[1] : '';
 		const tokenBaseURl = `https://login.microsoftonline.com/${tenantId}/oauth2/token`;
-		const { data: tokenData } = await axios({
-			method: 'post',
-			url: tokenBaseURl,
-			data: qs.stringify({
-				grant_type: 'client_credentials',
-				client_id: clientId,
-				client_secret: appSecret,
-				resource: 'https://management.azure.com/',
-			}),
+		const urlParams = new URLSearchParams();
+		urlParams.append('grant_type', 'client_credentials');
+		urlParams.append('client_id', clientId);
+		urlParams.append('client_secret', appSecret);
+		urlParams.append('resource', 'https://management.azure.com/');
+
+		const tokenResponse = await hckFetch(tokenBaseURl, {
+			method: 'POST',
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded',
 			},
+			body: urlParams,
 		});
+		const tokenData = await parseJsonResponse(tokenResponse);
 		const dbAccountBaseUrl = `https://management.azure.com/subscriptions/${subscriptionId}/resourceGroups/${resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/${accountName}?api-version=2015-04-08`;
-		const { data: accountData } = await axios({
-			method: 'get',
-			url: dbAccountBaseUrl,
+		const accountResponse = await hckFetch(dbAccountBaseUrl, {
 			headers: {
 				'Authorization': `${tokenData.token_type} ${tokenData.access_token}`,
 			},
 		});
+		const accountData = await parseJsonResponse(accountResponse);
 		logger.progress({
 			message: 'Getting account information',
 			containerName: connectionInfo.database,
@@ -741,6 +740,14 @@ async function getAdditionalAccountInfo(connectionInfo, logger) {
 		});
 		return {};
 	}
+}
+
+async function parseJsonResponse(response) {
+	if (response.status !== 200) {
+		throw new Error(await response.text());
+	}
+
+	return response.json();
 }
 
 function mapError(error) {
