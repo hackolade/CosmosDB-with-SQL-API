@@ -23,7 +23,7 @@ esbuild
 		outdir: RELEASE_FOLDER_PATH,
 		minify: true,
 		logLevel: 'info',
-		external: ['lodash'],
+		external: ['lodash', 'electron', '@hackolade/fetch'],
 		plugins: [
 			clean({
 				patterns: [DEFAULT_RELEASE_FOLDER_PATH],
@@ -32,6 +32,24 @@ esbuild
 				assets: {
 					from: [path.join('node_modules', 'lodash', '**', '*')],
 					to: [path.join('node_modules', 'lodash')],
+				},
+			}),
+			copy({
+				assets: {
+					from: [path.join('node_modules', '@hackolade', 'fetch', 'dist', 'cjs', '**', '*')],
+					to: [path.join('node_modules', '@hackolade', 'fetch', 'dist', 'cjs')],
+				},
+			}),
+			copy({
+				assets: {
+					from: [path.join('node_modules', '@hackolade', 'fetch', 'package.json')],
+					to: [path.join('node_modules', '@hackolade', 'fetch', 'package.json')],
+				},
+			}),
+			copy({
+				assets: {
+					from: [path.join('node_modules', '@hackolade', 'fetch', 'LICENSE')],
+					to: [path.join('node_modules', '@hackolade', 'fetch')],
 				},
 			}),
 			copyFolderFiles({
